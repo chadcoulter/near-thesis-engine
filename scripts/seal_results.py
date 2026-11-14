@@ -2,7 +2,7 @@
 """
 Seal thesis data, charts, and conclusions into the NEAR 231-gate sealed log.
 
-Calls the deployed contract at sealed-log-2026.testnet:
+Calls the deployed contract at redsigma.testnet:
   store_entry(agent_id, action_data) -> entry_id
 
 Each sealed entry gets SUM/LINEAR/PROD mod 231 checksums over action_data.
@@ -15,7 +15,7 @@ import json, os, shutil, subprocess, sys, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTRACT = os.environ.get("SEALED_LOG_CONTRACT", "sealed-log-2026.testnet")
+CONTRACT = os.environ.get("SEALED_LOG_CONTRACT", "redsigma.testnet")
 AGENT_ID = os.environ.get("SEALED_LOG_AGENT", "thesis-engine.testnet")
 SEAL_LOG = ROOT / "scripts" / "seal_log.json"
 MAX_PAYLOAD = 2000
