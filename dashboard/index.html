@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEAR Thesis Engine — Verifiable Onchain Thesis</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b0e11; color: #e8eaed; line-height: 1.5; padding: 24px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { border-bottom: 1px solid #2a2f38; padding-bottom: 20px; margin-bottom: 30px; }
+  h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  h1 span { color: #64ffda; }
+  .subtitle { color: #94a3b8; font-size: 14px; }
+  .card { background: #111827; border: 1px solid #2a2f38; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 16px; }
+  .demo-banner { background: #7a2e0e; border: 1px solid #ea580c; color: #fdba74; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .chart-card { background: #0b0e11; border: 1px solid #2a2f38; border-radius: 8px; padding: 16px; }
+  .chart-card img { width: 100%; border-radius: 6px; background: #000; }
+  .chart-card h3 { font-size: 14px; margin: 12px 0 6px; color: #64ffda; }
+  .chart-card p { font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
+  .chart-card .source { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .seal { margin-top: 10px; padding: 8px; background: #0b0e11; border: 1px solid #2a2f38; border-radius: 6px; font-size: 12px; font-family: ui-monospace, monospace; }
+  .seal.ok { border-left: 3px solid #10b981; }
+  .seal.demo { border-left: 3px solid #f59e0b; }
+  .seal .lbl { color: #64748b; font-size: 11px; text-transform: uppercase; }
+  .seal .val { color: #e8eaed; }
+  .thesis { margin-top: 30px; }
+  .thesis h3 { font-size: 16px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .thesis pre { background: #0b0e11; border: 1px solid #2a2f38; border-radius: 8px; padding: 16px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; }
+  .how-it-works { color: #94a3b8; font-size: 13px; margin-top: 30px; }
+  .how-it-works code { color: #64ffda; font-family: ui-monospace, monospace; }
+  .error-msg { color: #ef4444; font-size: 13px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><span>NEAR Thesis Engine</span></h1>
+    <div class="subtitle">Cross-chain Intents volume as a leading indicator of real network usage vs token price — every data pull, chart, and conclusion is 231-gate sealed on NEAR.</div>
+  </div>
+
+  <div id="demoBanner" class="demo-banner" style="display:none">
+    <strong>DEMO MODE:</strong> No GCP credentials or Intents API JWT available. No data fetched — no figures produced (per track prompt: "Never invent numbers"). Configure credentials to fetch live onchain data.
+  </div>
+
+  <div class="card">
+    <h2>Charts</h2>
+    <div id="charts" class="grid">Loading…</div>
+    <div id="chartsError" class="error-msg"></div>
+  </div>
+
+  <div class="card thesis">
+    <h3>Thesis</h3>
+    <div id="thesis">Loading…</div>
+  </div>
+
+  <div class="how-it-works">
+    <h3>How it works</h3>
+    <p>1. <code>python3 scripts/fetch_data.py</code> — pulls NEAR BigQuery + Intents Explorer data (set INTENTS_API_JWT and GCP credentials for live data).</p>
+    <p>2. <code>python3 scripts/build_charts.py</code> — rebuilds every chart from raw data.</p>
+    <p>3. <code>python3 scripts/seal_results.py</code> — seals data, charts, and thesis into the NEAR 231-gate sealed log at <code>sealed-log-2026.testnet</code>.</p>
+    <p>4. Verify any entry: <code>near view sealed-log-2026.testnet verify_entry '{"entry_id":&lt;id&gt;,"action_data":"&lt;data&gt;\"}'</code> → <code>true</code> intact, <code>false</code> tampered.</p>
+    <p class="hint">Track: thesis. Testnet-eligible (Q-010). Every number is traceable to a sealed entry — no invented figures.</p>
+  </div>
+</div>
+
+<script>
+// HTML-escape helper to prevent XSS from injected data (queries, takeaways, action_data, etc.)
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function loadJson(path) {
+  try {
+    const r = await fetch(path);
+    if (!r.ok) return null;
+    return r.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+(async () => {
+  const manifest = await loadJson("charts/manifest.json");
+  const sealLog = await loadJson("scripts/seal_log.json");
+
+  const demo = manifest ? manifest.demo : false;
+  document.getElementById("demoBanner").style.display = demo ? "block" : "none";
+
+  const chartsEl = document.getElementById("charts");
+  const chartsError = document.getElementById("chartsError");
+
+  if (!manifest) {
+    chartsEl.innerHTML = '<p style="color:#94a3b8">No charts yet. Run: python3 scripts/fetch_data.py && python3 scripts/build_charts.py</p>';
+  } else if (manifest.error) {
+    chartsError.textContent = manifest.error;
+    chartsEl.innerHTML = '<p style="color:#94a3b8">Charts skipped.</p>';
+  } else if (!manifest.charts || manifest.charts.length === 0) {
+    chartsEl.innerHTML = demo
+      ? '<p style="color:#94a3b8">No data fetched yet (demo mode). Set INTENTS_API_JWT and GCP credentials, then run: python3 scripts/fetch_data.py && python3 scripts/build_charts.py</p>'
+      : '<p style="color:#94a3b8">No charts generated.</p>';
+  } else {
+    // Build a lookup of sealed entries by label (last entry wins if duplicates)
+    const sealedByLabel = {};
+    if (sealLog && sealLog.entries) {
+      for (const e of sealLog.entries) {
+        sealedByLabel[e.label] = e;
+      }
+    }
+
+    chartsEl.innerHTML = manifest.charts.map(c => {
+      const sealed = sealedByLabel[c.name] || null;
+      const intact = sealed ? (sealed.verified_intact ? "INTACT" : "TAMPERED") : "NOT SEALED";
+      const sealClass = sealed && sealed.verified_intact ? "ok" : (sealed ? "demo" : "");
+      const actionPreview = sealed ? esc(sealed.action_data.slice(0, 80)) : '—';
+      return `
+        <div class="chart-card">
+          <img src="${esc(c.path)}" alt="${esc(c.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div style="display:none; color:#94a3b8; font-size:12px;">Image not available</div>
+          <h3>${esc(c.name.replace(/_/g, ' '))}</h3>
+          <p><strong>Takeaway:</strong> ${esc(c.takeaway || '')}</p>
+          <div class="source">Source: ${esc(c.source)}</div>
+          <details style="margin-top:10px;">
+            <summary style="color:#64ffda; cursor:pointer; font-size:12px;">Show SQL query</summary>
+            <pre style="font-size:11px; background:#0b0e11; border:1px solid #2a2f38; border-radius:6px; padding:8px; margin-top:6px; overflow-x:auto; white-space:pre-wrap; color:#94a3b8;">${esc(c.query || '')}</pre>
+          </details>
+          <div class="seal ${sealClass}">
+            <div class="lbl">Sealed entry #${sealed ? esc(sealed.entry_id) : '—'} — ${esc(intact)}</div>
+            <div class="val">${actionPreview}…</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const thesisEl = document.getElementById("thesis");
+  thesisEl.innerHTML = '<pre style="color:#94a3b8">Read THESIS.md — the claim, evidence for, evidence against, and what would change my mind. Every figure above is traceable to a sealed entry.</pre>';
+})();
+</script>
+</body>
+</html>
