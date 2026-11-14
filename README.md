@@ -61,8 +61,25 @@ Use a Testnet endpoint for `NEAR_RPC_URL`. The application rejects mainnet netwo
 
 ## Run the research and dashboard
 
+The repository now includes a **real-data submission snapshot**, its four charts, the exact sealed result and complete Intents audit archives. To demonstrate it immediately, run `python scripts/dashboard_server.py`, open the local URL, load `submission/result.json`, enter **entry ID 2**, and click **Retrieve + verify**. Source credentials are needed only for a fresh pull, not for inspecting or independently verifying this snapshot.
+
+The snapshot uses 30 completed UTC days of BigQuery data (October 15–November 13, 2026) and seven complete UTC days of Intents data (November 7–13, 2026): **144,458 successful 1Click swaps**, representing **$289,787,516.06** of API-reported inbound volume. The shorter Intents window was selected for the demo deadline after pagination crossed its lower boundary; incomplete days are excluded. The updated result is sealed in [Testnet transaction 2QawvYNZ3783ApE7vHUHNHS2mUT1g78uTu2CmuLaE3qA](https://testnet.nearblocks.io/txns/2QawvYNZ3783ApE7vHUHNHS2mUT1g78uTu2CmuLaE3qA), entry **2**, SHA-256 `2064d65c0af85b5359ea0f1b1d54156541423b6198288f750dac3c356cd77c3f`.
+
+Verify all contributing swap records and reproduce the numeric chart results offline:
+
 ```sh
-python scripts/fetch_data.py
+python scripts/verify_evidence.py --result submission/result.json
+python scripts/build_charts.py
+```
+
+The four gzip JSONL audit parts are committed under `data/intents-evidence/2026-11-07_2026-11-14/`. Each part is normally below eight MB. SHA-256 commitments cover both compressed bytes and uncompressed records; the offline verifier detects modified archives, duplicate swaps, wrong windows, missing records and incorrect daily totals. The sealed result includes aggregates and archive commitments, rather than silently truncating a large transaction history. Original chart PNGs are included; regenerating them on another operating system can change pixel hashes, so load the saved `submission/result.json` to verify the exact original seal.
+
+For a **fresh credentialed pull**, use the commands below. BigQuery uses user ADC from `gcloud auth application-default login`, a selected project in `GOOGLE_CLOUD_PROJECT`, and the BigQuery API enabled on that project. The demo was acquired in project `near-thesis-2026-e1ef72`, with billing independently verified as disabled. Use BigQuery Sandbox if you want the same no-billing setup. A reusable ADC credential inherits the user's Google Cloud permissions and stays outside the repository. Put only its path in `GOOGLE_APPLICATION_CREDENTIALS`; keep the Explorer JWT in the ignored local `.env`.
+
+`BQ_MAX_BYTES_BILLED` defaults to 20,000,000,000 bytes per query and `BQ_MAX_TOTAL_BYTES` to 60,000,000,000 per run. Every query is dry-run before any data query is submitted. Actual job IDs, estimated/processed bytes, dates and cache status are captured. `DATA_AS_OF_DATE` freezes the exclusive UTC end date; the demo uses `2026-11-14`. For a large history, set `INTENTS_EVIDENCE_MODE=archive` and `INTENTS_MAX_PAGES=1000`; use `INTENTS_WINDOW_DAYS=7` to reproduce this demo window. Checkpoints allow interrupted pulls to resume without losing verified pages. Cursor pagination is not an atomic database snapshot, so late settlements/backfills can change a new acquisition.
+
+```sh
+python scripts/fetch_data.py --require-live
 python scripts/build_charts.py
 python scripts/seal_results.py --prepare
 python scripts/dashboard_server.py
@@ -181,4 +198,4 @@ Playwright uses its installed Chromium by default. To use an existing browser, s
 - Research: [THESIS.md](THESIS.md), including evidence against the hypothesis and what would change it.
 - Demo: `python scripts/dashboard_server.py`, then the seven-step workflow above.
 - Reproducible result: `python scripts/seal_results.py --prepare`; attach the result JSON and transaction/entry evidence after a successful Testnet round trip.
-- Live demonstration: deployed and verified on Testnet, entry 1, with transaction evidence above. Remaining research dependency: supply real source credentials/data before presenting an empirically supported thesis. No submission upload or main-branch merge is performed by these scripts.
+- Live demonstration: entry 1 records the initial incomplete research; **entry 2 records the real-data snapshot**. Data credentials are configured locally and the snapshot is bundled for offline audit. The measured activity is evidence; relative predictive performance against token price remains untested. No submission upload or main-branch merge is performed by these scripts.

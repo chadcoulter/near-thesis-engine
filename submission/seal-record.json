@@ -1,0 +1,11 @@
+{
+  "entry_id": 2,
+  "transaction_id": "2QawvYNZ3783ApE7vHUHNHS2mUT1g78uTu2CmuLaE3qA",
+  "sha256": "2064d65c0af85b5359ea0f1b1d54156541423b6198288f750dac3c356cd77c3f",
+  "network": "testnet",
+  "contract": "redsigma.testnet",
+  "sealed_at": "2026-11-14T22:27:01.819917+00:00",
+  "verified_intact": true,
+  "exact_match": true,
+  "contract_verification": true
+}

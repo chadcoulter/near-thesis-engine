@@ -21,10 +21,10 @@ jobs:
       - run: python scripts/deep_edge_tests.py
       - run: python -m pytest -q
       - run: npm test
-      - run: python scripts/fetch_data.py
+      - run: python scripts/verify_evidence.py --result submission/result.json
       - run: python scripts/build_charts.py
       - run: python scripts/seal_results.py --prepare
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-thesis-demo-result
+          name: unsigned-thesis-snapshot-result
           path: artifacts/

@@ -28,7 +28,10 @@ os.environ.pop("INTENTS_API_JWT", None)
 import importlib
 importlib.reload(fetch_data)
 # Call the fetch functions to trigger IS_DEMO setting
-fetch_data.fetch_bigquery()
+from unittest.mock import patch
+# Keep this suite offline even after real ADC credentials are configured.
+with patch.dict(os.environ, {'GOOGLE_APPLICATION_CREDENTIALS': str(ROOT / '.tmp' / 'intentionally-missing-demo-credential.json')}):
+    fetch_data.fetch_bigquery()
 fetch_data.fetch_intents_api(None)
 check("demo mode is True", fetch_data.IS_DEMO == True)
 

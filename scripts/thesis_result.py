@@ -18,6 +18,16 @@ def generate(root=ROOT):
     if path.exists() and manifest.get('input_sha256') != hashlib.sha256(canonical(raw).encode('utf-8')).hexdigest():
         raise ValueError('Chart manifest does not match latest raw data. Generate result or run scripts/build_charts.py.')
     demo = raw.get('demo', True) or manifest.get('demo', True)
+    for source in raw.get('sources', []):
+        for reference in source.get('evidence_files', []):
+            evidence_path = (root / reference['path']).resolve()
+            if not evidence_path.is_relative_to((root / 'data' / 'intents-evidence').resolve()):
+                raise ValueError('Audit archive must be inside data/intents-evidence')
+            if not evidence_path.is_file():
+                raise ValueError(f'Audit archive is missing or differs: {reference["path"]}')
+            with evidence_path.open('rb') as stream:
+                if hashlib.file_digest(stream, 'sha256').hexdigest() != reference['sha256']:
+                    raise ValueError(f'Audit archive is missing or differs: {reference["path"]}')
     assets = {}
     for chart in manifest.get('charts', []):
         path = root / 'charts' / (chart['name'] + '.png')

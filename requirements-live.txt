@@ -1,2 +1,2 @@
 -r requirements.txt
-google-cloud-bigquery>=3,<4
+google-cloud-bigquery==3.47.0

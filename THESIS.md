@@ -27,25 +27,43 @@ GROUP BY block_date
 ORDER BY block_date
 ```
 
+## Metrics computed from live data
+
+This snapshot uses real NEAR mainnet research data, with its verification record on **NEAR Testnet**. BigQuery covers **2026-10-15 through 2026-11-13** (30 completed UTC days). Contract usage and Intents cover **November 7–13, 2026** (7 completed UTC days). The shorter Intents window was selected for the demo deadline only after cursor pagination had crossed its lower boundary; no partial day or incomplete page total is reported.
+
+| Observation | Measured result |
+|---|---:|
+| Daily active signer accounts, first → last day | 55,503 → 85,595 |
+| Change in daily active signers, first vs last day | 54.22% |
+| Total transactions over 30 days | 20,344,165 |
+| Daily transactions, first → last day | 911,980 → 1,036,324 |
+| Most-called contract, trailing 7 days | `game.hot.tg` — 1,952,431 function-call actions |
+| Successful 1Click swaps in the complete 7-day window | 144,458 |
+| Reported inbound USD volume over those 7 days | $289,787,516.06 |
+| Intents daily volume, first → last observed day | $29,084,781.89 → $59,747,874.26 |
+
+The USD values are the Explorer API's `amountInUsd`, counted once per successful swap and summed by UTC creation date using decimal arithmetic. They describe **1Click** activity, not all NEAR Intents activity. Active signers are accounts, not verified humans. Transaction counts include the table's transaction records; contract counts measure receipt function-call actions.
+
+All 144,458 contributing swap records are retained in 4 gzip JSONL audit parts. The result commits each compressed file and its uncompressed content with SHA-256. `python scripts/verify_evidence.py` independently reconstructs the daily totals offline. Query windows, actual SQL, BigQuery job IDs, processed bytes and archive hashes are included in the result evidence. Google project billing is disabled.
+
 ## Metrics that could NOT be computed
 
-This run executed in **demo mode** because no GCP credentials or Intents API JWT were available. Per the track prompt ("Never invent numbers"), **no figures are reported** for:
+- Relative predictive performance against token price: this snapshot has no NEAR/USD price baseline.
+- A credible 90+ day Granger or out-of-sample leading-indicator test: the Intents demo window is only seven days.
+- Organic versus incentivized volume, unique human users, and activity outside the 1Click Explorer's coverage.
 
-- Daily active accounts (BigQuery query not run — no credentials)
-- Transaction counts (BigQuery query not run — no credentials)
-- Contract usage / top contracts (BigQuery query not run — no credentials)
-- Intents swap volume (API not called — no JWT)
-
-To compute these, set `INTENTS_API_JWT` (from https://partners.near-intents.org) and GCP credentials, then run `python3 scripts/fetch_data.py`. Until then, THESIS.md intentionally contains **no numbers**.
+These metrics are not invented or inferred from the descriptive charts.
 
 ## Evidence FOR the claim
 
-None reported yet — no live data has been fetched. The hypothesis is plausible on first principles (cross-chain settlement volume measures actual economic activity; price is forward-looking and manipulable) but untested against data.
+The data establish observable settlement activity and network usage: 144,458 successful 1Click swaps represent $289,787,516.06 of reported inbound volume, while the 30-day network window contains 20,344,165 transactions. Daily active signer counts rose 55,503 → 85,595. This supports measuring economic activity directly rather than relying only on token price.
+
+It does **not** establish that Intents volume leads network activity, or that it outperforms price. The windows differ, endpoint comparisons are not predictive models, and a seven-day sample cannot support that conclusion.
 
 ## Evidence AGAINST the claim
 
 - **Correlation vs causation**: Intents volume could rise because of a single large airdrop or incentive program, not organic usage. We don't distinguish organic vs incentivized volume.
-- **Sample size**: 30 days of daily data is short for a "leading indicator" claim. Needs 90+ days to establish predictive power.
+- **Sample size and window alignment**: BigQuery has 30 daily observations, but Intents has seven completed days in this deadline-limited snapshot. Any comparison must use overlapping dates. A predictive claim still needs a substantially longer series and an actual price baseline.
 - **Price leads volume in bull markets**: In strong uptrends, price often rises first and volume follows — the reverse of our claim. We haven't tested bear-market periods.
 - **Data freshness**: BigQuery has ingestion lag; Intents API may not capture all cross-chain routes (some settle off-explorer).
 

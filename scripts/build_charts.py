@@ -64,6 +64,12 @@ def _save_chart(name: str, fig):
     return 'charts/' + path.name
 
 
+def _date_ticks(dates):
+    step = max(1, (len(dates) + 4) // 6)
+    indexes = sorted(set(range(0, len(dates), step)) | {len(dates) - 1})
+    plt.xticks(indexes, [dates[index] for index in indexes], rotation=45)
+
+
 def _takeaway(name: str, rows: list) -> str:
     """Compute a one-sentence takeaway from actual data — never hardcoded."""
     if not rows:
@@ -107,7 +113,7 @@ def build(bundle: dict) -> dict:
                 fig = plt.figure(figsize=(8, 4))
                 plt.plot(dates, vals, marker="o")
                 plt.title(f"NEAR Daily Active Accounts ({source_name})")
-                plt.xlabel("Date"); plt.ylabel("Accounts"); plt.xticks(rotation=45); plt.tight_layout()
+                plt.xlabel("Date"); plt.ylabel("Accounts"); _date_ticks(dates); plt.tight_layout()
                 p = _save_chart("daily_active_accounts", fig)
                 meta = CHART_META["daily_active_accounts"]
                 manifest["charts"].append({
@@ -126,7 +132,7 @@ def build(bundle: dict) -> dict:
                 fig = plt.figure(figsize=(8, 4))
                 plt.bar(dates, vals)
                 plt.title(f"NEAR Transaction Counts ({source_name})")
-                plt.xlabel("Date"); plt.ylabel("Transactions"); plt.xticks(rotation=45); plt.tight_layout()
+                plt.xlabel("Date"); plt.ylabel("Transactions"); _date_ticks(dates); plt.tight_layout()
                 p = _save_chart("transaction_counts", fig)
                 meta = CHART_META["transaction_counts"]
                 manifest["charts"].append({
@@ -166,7 +172,7 @@ def build(bundle: dict) -> dict:
                 fig = plt.figure(figsize=(8, 4))
                 plt.plot(dates, vals, marker="s", color="green")
                 plt.title(f"NEAR Intents Daily Swap Volume (USD) ({source_name})")
-                plt.xlabel("Date"); plt.ylabel("Volume (USD)"); plt.xticks(rotation=45); plt.tight_layout()
+                plt.xlabel("Date"); plt.ylabel("Volume (USD)"); _date_ticks(dates); plt.tight_layout()
                 p = _save_chart("intents_swap_volume", fig)
                 meta = CHART_META["intents_swap_volume"]
                 manifest["charts"].append({

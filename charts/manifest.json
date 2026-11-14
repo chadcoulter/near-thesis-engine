@@ -1,0 +1,35 @@
+{
+  "charts": [
+    {
+      "name": "daily_active_accounts",
+      "path": "charts/daily_active_accounts.png",
+      "source": "near-bigquery",
+      "query": "\n                SELECT block_date, COUNT(DISTINCT signer_account_id) as daily_active_accounts\n                FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                GROUP BY block_date ORDER BY block_date\n            ",
+      "takeaway": "Daily active accounts moved up over the period (55503 \u2192 85595), based on 30 days of BigQuery data."
+    },
+    {
+      "name": "transaction_counts",
+      "path": "charts/transaction_counts.png",
+      "source": "near-bigquery",
+      "query": "\n                SELECT block_date, COUNT(*) as tx_count\n                FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                GROUP BY block_date ORDER BY block_date\n            ",
+      "takeaway": "30 days of transactions totaling 20,344,165 (avg 678,139/day) from BigQuery."
+    },
+    {
+      "name": "contract_usage",
+      "path": "charts/contract_usage.png",
+      "source": "near-bigquery",
+      "query": "\n                SELECT receipt_receiver_account_id AS receiver_id, COUNT(*) as call_count\n                FROM `bigquery-public-data.crypto_near_mainnet_us.receipt_actions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                  AND action_kind = 'FUNCTION_CALL'\n                GROUP BY receiver_id ORDER BY call_count DESC LIMIT 20\n            ",
+      "takeaway": "game.hot.tg is the most-called contract with 1952431 calls, based on 10 contracts from BigQuery."
+    },
+    {
+      "name": "intents_swap_volume",
+      "path": "charts/intents_swap_volume.png",
+      "source": "near-intents-explorer",
+      "query": "GET https://explorer.near-intents.org/api/v0/transactions; params={\"direction\":\"next\",\"endTimestamp\":\"2026-11-14T00:00:00+00:00\",\"numberOfTransactions\":1000,\"startTimestamp\":\"2026-10-15T00:00:00+00:00\",\"statuses\":\"SUCCESS\"}; locally restrict to 2026-11-07T00:00:00+00:00 <= createdAt < 2026-11-14T00:00:00+00:00; sum amountInUsd by UTC date",
+      "takeaway": "Intents swap volume totaled $289,787,516 over 7 days from the Intents Explorer API."
+    }
+  ],
+  "demo": false,
+  "built_at": "2026-11-14T22:25:44.694190+00:00",
+  "input_sha256": "5b14f6455b21a8dce7aa7bf836f6aa6c0f5c64bf674ddf19e1fb001392e0248f"
+}

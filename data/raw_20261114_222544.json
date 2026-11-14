@@ -1,0 +1,496 @@
+{
+  "fetched_at": "2026-11-14T22:25:44.694190+00:00",
+  "demo": false,
+  "sources": [
+    {
+      "source": "near-bigquery",
+      "fetched_at": "2026-11-14T22:01:17.990029+00:00",
+      "demo": false,
+      "queries": {
+        "daily_active_accounts": "\n                SELECT block_date, COUNT(DISTINCT signer_account_id) as daily_active_accounts\n                FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                GROUP BY block_date ORDER BY block_date\n            ",
+        "transaction_counts": "\n                SELECT block_date, COUNT(*) as tx_count\n                FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                GROUP BY block_date ORDER BY block_date\n            ",
+        "contract_usage": "\n                SELECT receipt_receiver_account_id AS receiver_id, COUNT(*) as call_count\n                FROM `bigquery-public-data.crypto_near_mainnet_us.receipt_actions`\n                WHERE block_date >= @start_date AND block_date < @end_date\n                  AND action_kind = 'FUNCTION_CALL'\n                GROUP BY receiver_id ORDER BY call_count DESC LIMIT 20\n            "
+      },
+      "window": {
+        "start_date": "2026-10-15",
+        "contract_start_date": "2026-11-07",
+        "end_date_exclusive": "2026-11-14",
+        "timezone": "UTC"
+      },
+      "query_project": "near-thesis-2026-e1ef72",
+      "dry_run_bytes": {
+        "daily_active_accounts": 600313849,
+        "transaction_counts": 162753320,
+        "contract_usage": 1233093029
+      },
+      "jobs": {
+        "daily_active_accounts": {
+          "job_id": "bbe0a3ee-a4f2-49f3-87a8-d7cd0cd4f844",
+          "bytes_processed": 600313849,
+          "bytes_billed": 600834048,
+          "cache_hit": false
+        },
+        "transaction_counts": {
+          "job_id": "e0bbf2aa-676d-464f-b90c-9506505687bb",
+          "bytes_processed": 162753320,
+          "bytes_billed": 163577856,
+          "cache_hit": false
+        },
+        "contract_usage": {
+          "job_id": "924c6511-7edd-49e6-9fa8-fd873e1e0c29",
+          "bytes_processed": 1233093029,
+          "bytes_billed": 1233125376,
+          "cache_hit": false
+        }
+      },
+      "data": {
+        "daily_active_accounts": [
+          {
+            "block_date": "2026-10-15",
+            "daily_active_accounts": 55503
+          },
+          {
+            "block_date": "2026-10-16",
+            "daily_active_accounts": 54936
+          },
+          {
+            "block_date": "2026-10-17",
+            "daily_active_accounts": 54322
+          },
+          {
+            "block_date": "2026-10-18",
+            "daily_active_accounts": 51810
+          },
+          {
+            "block_date": "2026-10-19",
+            "daily_active_accounts": 53107
+          },
+          {
+            "block_date": "2026-10-20",
+            "daily_active_accounts": 52116
+          },
+          {
+            "block_date": "2026-10-21",
+            "daily_active_accounts": 53919
+          },
+          {
+            "block_date": "2026-10-22",
+            "daily_active_accounts": 51423
+          },
+          {
+            "block_date": "2026-10-23",
+            "daily_active_accounts": 51214
+          },
+          {
+            "block_date": "2026-10-24",
+            "daily_active_accounts": 50178
+          },
+          {
+            "block_date": "2026-10-25",
+            "daily_active_accounts": 49245
+          },
+          {
+            "block_date": "2026-10-26",
+            "daily_active_accounts": 49601
+          },
+          {
+            "block_date": "2026-10-27",
+            "daily_active_accounts": 61855
+          },
+          {
+            "block_date": "2026-10-28",
+            "daily_active_accounts": 49273
+          },
+          {
+            "block_date": "2026-10-29",
+            "daily_active_accounts": 49292
+          },
+          {
+            "block_date": "2026-10-30",
+            "daily_active_accounts": 47349
+          },
+          {
+            "block_date": "2026-10-31",
+            "daily_active_accounts": 46019
+          },
+          {
+            "block_date": "2026-11-01",
+            "daily_active_accounts": 46478
+          },
+          {
+            "block_date": "2026-11-02",
+            "daily_active_accounts": 48060
+          },
+          {
+            "block_date": "2026-11-03",
+            "daily_active_accounts": 72343
+          },
+          {
+            "block_date": "2026-11-04",
+            "daily_active_accounts": 79164
+          },
+          {
+            "block_date": "2026-11-05",
+            "daily_active_accounts": 78560
+          },
+          {
+            "block_date": "2026-11-06",
+            "daily_active_accounts": 78574
+          },
+          {
+            "block_date": "2026-11-07",
+            "daily_active_accounts": 77076
+          },
+          {
+            "block_date": "2026-11-08",
+            "daily_active_accounts": 79184
+          },
+          {
+            "block_date": "2026-11-09",
+            "daily_active_accounts": 77752
+          },
+          {
+            "block_date": "2026-11-10",
+            "daily_active_accounts": 177510
+          },
+          {
+            "block_date": "2026-11-11",
+            "daily_active_accounts": 77831
+          },
+          {
+            "block_date": "2026-11-12",
+            "daily_active_accounts": 85370
+          },
+          {
+            "block_date": "2026-11-13",
+            "daily_active_accounts": 85595
+          }
+        ],
+        "transaction_counts": [
+          {
+            "block_date": "2026-10-15",
+            "tx_count": 911980
+          },
+          {
+            "block_date": "2026-10-16",
+            "tx_count": 658427
+          },
+          {
+            "block_date": "2026-10-17",
+            "tx_count": 557903
+          },
+          {
+            "block_date": "2026-10-18",
+            "tx_count": 569735
+          },
+          {
+            "block_date": "2026-10-19",
+            "tx_count": 607019
+          },
+          {
+            "block_date": "2026-10-20",
+            "tx_count": 617990
+          },
+          {
+            "block_date": "2026-10-21",
+            "tx_count": 658784
+          },
+          {
+            "block_date": "2026-10-22",
+            "tx_count": 547267
+          },
+          {
+            "block_date": "2026-10-23",
+            "tx_count": 609236
+          },
+          {
+            "block_date": "2026-10-24",
+            "tx_count": 635438
+          },
+          {
+            "block_date": "2026-10-25",
+            "tx_count": 550250
+          },
+          {
+            "block_date": "2026-10-26",
+            "tx_count": 573801
+          },
+          {
+            "block_date": "2026-10-27",
+            "tx_count": 604320
+          },
+          {
+            "block_date": "2026-10-28",
+            "tx_count": 520096
+          },
+          {
+            "block_date": "2026-10-29",
+            "tx_count": 649103
+          },
+          {
+            "block_date": "2026-10-30",
+            "tx_count": 691420
+          },
+          {
+            "block_date": "2026-10-31",
+            "tx_count": 502649
+          },
+          {
+            "block_date": "2026-11-01",
+            "tx_count": 509345
+          },
+          {
+            "block_date": "2026-11-02",
+            "tx_count": 522358
+          },
+          {
+            "block_date": "2026-11-03",
+            "tx_count": 597189
+          },
+          {
+            "block_date": "2026-11-04",
+            "tx_count": 706690
+          },
+          {
+            "block_date": "2026-11-05",
+            "tx_count": 848794
+          },
+          {
+            "block_date": "2026-11-06",
+            "tx_count": 717484
+          },
+          {
+            "block_date": "2026-11-07",
+            "tx_count": 682432
+          },
+          {
+            "block_date": "2026-11-08",
+            "tx_count": 609504
+          },
+          {
+            "block_date": "2026-11-09",
+            "tx_count": 895302
+          },
+          {
+            "block_date": "2026-11-10",
+            "tx_count": 970505
+          },
+          {
+            "block_date": "2026-11-11",
+            "tx_count": 891297
+          },
+          {
+            "block_date": "2026-11-12",
+            "tx_count": 891523
+          },
+          {
+            "block_date": "2026-11-13",
+            "tx_count": 1036324
+          }
+        ],
+        "contract_usage": [
+          {
+            "receiver_id": "game.hot.tg",
+            "call_count": 1952431
+          },
+          {
+            "receiver_id": "intents.near",
+            "call_count": 1272672
+          },
+          {
+            "receiver_id": "token.sweat",
+            "call_count": 1002737
+          },
+          {
+            "receiver_id": "wrap.near",
+            "call_count": 682444
+          },
+          {
+            "receiver_id": "dclv2.ref-labs.near",
+            "call_count": 638942
+          },
+          {
+            "receiver_id": "v2.ref-finance.near",
+            "call_count": 617707
+          },
+          {
+            "receiver_id": "omni.bridge.near",
+            "call_count": 532931
+          },
+          {
+            "receiver_id": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+            "call_count": 519326
+          },
+          {
+            "receiver_id": "v2.jars.sweat",
+            "call_count": 455665
+          },
+          {
+            "receiver_id": "claim.sweat",
+            "call_count": 390915
+          },
+          {
+            "receiver_id": "v1.signer",
+            "call_count": 374766
+          },
+          {
+            "receiver_id": "sol.omft.near",
+            "call_count": 242407
+          },
+          {
+            "receiver_id": "vaa-prover-0_4_13.bridge.near",
+            "call_count": 219506
+          },
+          {
+            "receiver_id": "aggregate-oracle.near",
+            "call_count": 200173
+          },
+          {
+            "receiver_id": "aa-harvest-moon.near",
+            "call_count": 135123
+          },
+          {
+            "receiver_id": "contract.wormhole_crypto.near",
+            "call_count": 111285
+          },
+          {
+            "receiver_id": "btc-connector.bridge.near",
+            "call_count": 108939
+          },
+          {
+            "receiver_id": "omft.near",
+            "call_count": 97090
+          },
+          {
+            "receiver_id": "sol-5ce3bf3a31af18be40ba30f721101b4341690186.omft.near",
+            "call_count": 89386
+          },
+          {
+            "receiver_id": "fast-auth.near",
+            "call_count": 72193
+          }
+        ]
+      }
+    },
+    {
+      "source": "near-intents-explorer",
+      "demo": false,
+      "fetched_at": "2026-11-14T22:24:20.006648+00:00",
+      "window": {
+        "start": "2026-11-07T00:00:00+00:00",
+        "end_exclusive": "2026-11-14T00:00:00+00:00",
+        "timezone": "UTC"
+      },
+      "query": "GET https://explorer.near-intents.org/api/v0/transactions; params={\"direction\":\"next\",\"endTimestamp\":\"2026-11-14T00:00:00+00:00\",\"numberOfTransactions\":1000,\"startTimestamp\":\"2026-10-15T00:00:00+00:00\",\"statuses\":\"SUCCESS\"}; locally restrict to 2026-11-07T00:00:00+00:00 <= createdAt < 2026-11-14T00:00:00+00:00; sum amountInUsd by UTC date",
+      "collection_provenance": {
+        "method": "Complete seven-day subwindow from contiguous newest-first API pages retrieved past its lower boundary; longer pull stopped for demo deadline",
+        "original_params": {
+          "direction": "next",
+          "endTimestamp": "2026-11-14T00:00:00+00:00",
+          "numberOfTransactions": 1000,
+          "startTimestamp": "2026-10-15T00:00:00+00:00",
+          "statuses": "SUCCESS"
+        },
+        "parent_checkpoint_sha256": "08232dcca9a6f2a89ec40ae25e0abbef3896b8c88458758a973bcaab8fea8784",
+        "retrieved_oldest_created_at": "2026-11-06T14:32:08.062Z"
+      },
+      "coverage": "All returned SUCCESS 1Click swaps in the complete bounded window. Not all NEAR Intents activity; days with no returned swaps omitted.",
+      "snapshot_consistency": "Cursor pagination is not an atomic database snapshot; late settlements or backfills can change future reruns.",
+      "audit_storage": "Complete contributing records in gzip JSONL pages; each archive and uncompressed content are SHA-256 committed. No transaction records are truncated.",
+      "archive_schema": [
+        "depositAddress",
+        "depositMemo",
+        "createdAt",
+        "amountInUsd",
+        "nearTxHashes",
+        "status"
+      ],
+      "evidence_files": [
+        {
+          "filename": "transactions-part-001.jsonl.gz",
+          "sha256": "7bf98fa27d9f71102159cf3b0ef660d76f51295a8e45b6071671fa752a337ed0",
+          "content_sha256": "591f71be684e842d16f02140a652e5befbc02c2bbf70309fcfc910220515007c",
+          "bytes": 7955647,
+          "records": 42000,
+          "format": "gzip JSON Lines (concatenated members)",
+          "path": "data/intents-evidence/2026-11-07_2026-11-14/transactions-part-001.jsonl.gz"
+        },
+        {
+          "filename": "transactions-part-002.jsonl.gz",
+          "sha256": "55613f9c6f0ebc811bb741214aaca498cfd6f1b784132d3d578fc35bdb52036b",
+          "content_sha256": "d4f41285ad4eb481ac897b818ec38d6088456008e4586834f3ac3ba46451fb6e",
+          "bytes": 7924811,
+          "records": 42000,
+          "format": "gzip JSON Lines (concatenated members)",
+          "path": "data/intents-evidence/2026-11-07_2026-11-14/transactions-part-002.jsonl.gz"
+        },
+        {
+          "filename": "transactions-part-003.jsonl.gz",
+          "sha256": "0927457354729922c29735c1929e79df8bb5c4b3efb5f5b005d74a735d3c4b58",
+          "content_sha256": "af839ea1d093c6b90703095e133c6186602a268f0ba99f90f2f3c1728d720c3d",
+          "bytes": 7993134,
+          "records": 42000,
+          "format": "gzip JSON Lines (concatenated members)",
+          "path": "data/intents-evidence/2026-11-07_2026-11-14/transactions-part-003.jsonl.gz"
+        },
+        {
+          "filename": "transactions-part-004.jsonl.gz",
+          "sha256": "71218532e744f8a7bf4265052ea73e754c4d0feed347c648b113c2c5cec16c8f",
+          "content_sha256": "7452ffc6072d97e464e397a62fc23a47d1c8d4fe238f562d6087b4e44ec8c36b",
+          "bytes": 3522337,
+          "records": 18458,
+          "format": "gzip JSON Lines (concatenated members)",
+          "path": "data/intents-evidence/2026-11-07_2026-11-14/transactions-part-004.jsonl.gz"
+        }
+      ],
+      "transaction_count": 144458,
+      "retrieved_pages": 145,
+      "data": {
+        "daily_swap_volume_usd": [
+          {
+            "date": "2026-11-07",
+            "volume_usd": 29084781.888028376,
+            "volume_usd_decimal": "29084781.888028374726",
+            "swap_count": 17300
+          },
+          {
+            "date": "2026-11-08",
+            "volume_usd": 26301194.02515628,
+            "volume_usd_decimal": "26301194.025156277767",
+            "swap_count": 14651
+          },
+          {
+            "date": "2026-11-09",
+            "volume_usd": 43331710.00669459,
+            "volume_usd_decimal": "43331710.006694590507",
+            "swap_count": 20243
+          },
+          {
+            "date": "2026-11-10",
+            "volume_usd": 48679672.700381204,
+            "volume_usd_decimal": "48679672.700381205016",
+            "swap_count": 21953
+          },
+          {
+            "date": "2026-11-11",
+            "volume_usd": 37258176.5850961,
+            "volume_usd_decimal": "37258176.585096096911",
+            "swap_count": 20480
+          },
+          {
+            "date": "2026-11-12",
+            "volume_usd": 45384106.598456904,
+            "volume_usd_decimal": "45384106.598456902006",
+            "swap_count": 23226
+          },
+          {
+            "date": "2026-11-13",
+            "volume_usd": 59747874.25924778,
+            "volume_usd_decimal": "59747874.259247779840",
+            "swap_count": 26605
+          }
+        ]
+      }
+    }
+  ]
+}
