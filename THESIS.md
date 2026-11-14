@@ -58,14 +58,14 @@ None reported yet — no live data has been fetched. The hypothesis is plausible
 
 ## Verification
 
-Every data pull, chart manifest, and thesis conclusion is sealed into the NEAR contract at `sealed-log-2026.testnet` via SUM/LINEAR/PRODUCT mod 231 checksums. Once live data is fetched, each pull is sealed immediately.
+Every data pull, chart manifest, and thesis conclusion is sealed into the NEAR contract at `redsigma.testnet` via SUM/LINEAR/PRODUCT mod 231 checksums. Once live data is fetched, each pull is sealed immediately.
 
 ```
 # Verify a sealed entry is intact
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>"}'  → true
+near view redsigma.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>"}'  → true
 
 # Tamper detection (change one char)
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>!\"}'  → false
+near view redsigma.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>!\"}'  → false
 ```
 
 ## Dashboard

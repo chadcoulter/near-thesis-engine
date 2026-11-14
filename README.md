@@ -11,10 +11,10 @@ Most submissions show charts and assert a thesis. Nothing proves the data wasn't
 
 ## What we built
 
-A verifiable thesis engine where **every data pull, chart, and conclusion is cryptographically sealed** on NEAR via our 231-gate tamper-evident contract (`sealed-log-2026.testnet`):
+A verifiable thesis engine where **every data pull, chart, and conclusion is recorded with deterministic checksums** on NEAR via our 231-gate tamper-evident contract (`redsigma.testnet`):
 
 - **SUM** = Σ gᵢ mod 231, **LINEAR** = (g₁×22 + g₂) mod 231, **PROD** = Π gᵢ mod 231
-- Every byte of action data feeds all five gates — single-char change breaks ≥3 of 6 layers
+- Action data bytes are distributed across five gates; checksums detect many changes but collisions are possible
 - Public re-verification: anyone can call `verify_entry` offline and detect tampering
 
 Thesis: cross-chain Intents volume is a better leading indicator of real NEAR usage than token price.
@@ -49,7 +49,7 @@ See: writes `scripts/seal_log.json` with entry IDs. Each entry is immediately re
 ### 4. Verify a sealed entry (tamper detection)
 
 ```
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>"}'
+near contract call-function as-read-only redsigma.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>"}'
 ```
 
 See: `true` — checksums match, entry intact.
@@ -57,7 +57,7 @@ See: `true` — checksums match, entry intact.
 Change one character:
 
 ```
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>!"}'
+near contract call-function as-read-only redsigma.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>!"}'
 ```
 
 See: `false` — checksum mismatch, tamper detected.
@@ -80,7 +80,7 @@ Open `dashboard/index.html`. Shows all charts, each with its source query, one p
 | `get_entries_paginated` | view | `{from, limit}` | `{entries, next_from}` |
 | `entry_count` | view | — | `u64` |
 
-Contract: `sealed-log-2026.testnet` (deployed on NEAR testnet).
+Contract: `redsigma.testnet` (deployed on NEAR testnet). Entry #1 is publicly readable; the recorded evidence is demo mode and does not validate the hypothesis.
 
 ## Verification (independent, no NEAR needed)
 
@@ -106,7 +106,7 @@ See `THESIS.md#known-limitations` for the full tamper-detection analysis.
 
 - **Hivebuy** (swarms/agents): group buying with sealed bids. We don't collide — different track.
 - **Heterotopia** (agent escrow/limits): agent spending limits. We don't collide — different track.
-- **Other thesis entries**: charts + assertions, no cryptographic proof the data wasn't cherry-picked.
+- **Other thesis entries**: charts + assertions, no deterministic integrity check the data wasn't cherry-picked.
 
 Our moat: 231-gate sealed storage makes the thesis verifiably tamper-evident.
 
@@ -118,4 +118,23 @@ Testnet-eligible per Q-010.
 
 ## Contract address
 
-Testnet: `sealed-log-2026.testnet` (deployed live).
+Testnet: `redsigma.testnet` (deployed live).
+
+## Current verified status (2026-11-14)
+
+- NEAR Testnet contract: https://testnet.nearblocks.io/address/redsigma.testnet
+- `get_owner()` returned `redsigma.testnet`; `entry_count()` returned `1`.
+- `get_entry({"entry_id":1})` returned a stored `thesis-engine` demo-mode record, with checksums SUM=11, LINEAR=141, PROD=168.
+- The explorer rejected `verify_entry` for the full thesis payload with `Request too large`; end-to-end verification of that entry is **not yet confirmed**.
+- Live data retrieval is not configured, so there are **no empirical results** supporting or rejecting the hypothesis yet.
+- `231-gate` checksums are **not cryptographic hashes** and can collide. The blockchain stores a record, not proof that its source data is complete or unbiased.
+
+### Judge demo (read-only, no wallet needed)
+
+```cmd
+near contract call-function as-read-only redsigma.testnet get_owner json-args "{}" network-config testnet now
+near contract call-function as-read-only redsigma.testnet entry_count json-args "{}" network-config testnet now
+near contract call-function as-read-only redsigma.testnet get_entry json-args "{\"entry_id\":1}" network-config testnet now
+```
+
+Run `python scripts/verify.py` for deterministic local checksum tests. The thesis is an **unvalidated research hypothesis**, not investment advice.
