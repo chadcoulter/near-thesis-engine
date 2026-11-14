@@ -94,9 +94,15 @@ The dashboard accepts a loaded result as supplied evidence; loading or sealing i
 
 Target: **`redsigma.testnet`**, exclusively on NEAR Testnet. The companion is [chadcoulter/near-sealed-log](https://github.com/chadcoulter/near-sealed-log). The integration was checked against [`contract/src/lib.rs` at commit `663315c`](https://github.com/chadcoulter/near-sealed-log/blob/663315cbdb2cb1fe87a14a8a8329686666a5139f/contract/src/lib.rs); the exact ABI and transaction requirements are documented in [CONTRACT_INTEGRATION.md](CONTRACT_INTEGRATION.md).
 
-**Deployment check on November 14, 2026:** both the NEAR public Testnet RPC and FastNEAR Testnet RPC returned “contract code does not exist” for `redsigma.testnet`. The account exists, but its code hash was `11111111111111111111111111111111`. A signed store/retrieve/verify round trip cannot yet run there. No wallet credentials were found in this implementation environment. The companion's [contract build fix PR #2](https://github.com/chadcoulter/near-sealed-log/pull/2) was still open when inspected. This repository does not replace or modify that contract.
+**Live on November 14, 2026:** the source-built contract was deployed and initialized at `redsigma.testnet`, with owner `redsigma.testnet`. The live store/retrieve/verify demonstration succeeded for **entry 1**. The original candidate passed both checksum verification and exact content comparison; an edited candidate failed, a missing ID returned null, and pagination returned the stored entry. Public identifiers and check results are retained in [deployment/testnet-demo.json](deployment/testnet-demo.json).
 
-The companion was also **built locally from source** at commit `663315cbdb2cb1fe87a14a8a8329686666a5139f` using Rust/Cargo 1.100.0 and `cargo build --target wasm32-unknown-unknown --release`. The build succeeded. Node's WebAssembly validator accepted the artifact and confirmed exports for `new`, `store_entry`, `verify_entry`, `get_entry`, `get_entries_paginated`, `entry_count` and `get_owner`. Its SHA-256 is `58280a433ee5098e569ac5d526e7c9da3744e08873be8c5b4f0f86ae73ab0c76`. This validates compilation and module structure, not execution in NEAR's runtime. The separate companion CI/test fix remains under review.
+- [Deployment + initialization transaction](https://testnet.nearblocks.io/txns/CfqwJwujoueXKzu5vN5sHMDgAp53YYcWrTonp93WNNdn)
+- [Thesis result store transaction](https://testnet.nearblocks.io/txns/5t3aDBUGZehvARaxENTTvHhb4GLhKurdDZoNXmbafZLh)
+- Result SHA-256: `98d0b22be6e2e4f92faeb9ff904a94dd18d64a46ec46fac630fa08e0d8ef71ec`.
+
+The authorized existing account key was imported locally, outside the repository, after explicit user approval. No extra on-chain key was added. The research result remains explicitly in demo mode because GCP and Intents partner credentials were not supplied. A successful seal proves the recorded content matches, not that the research hypothesis is supported.
+
+The companion was **built locally from source** at commit `663315cbdb2cb1fe87a14a8a8329686666a5139f` using Rust/Cargo 1.100.0 and `cargo build --target wasm32-unknown-unknown --release`. The build succeeded. Node's WebAssembly validator accepted the artifact and confirmed the required exports. Its SHA-256 is `58280a433ee5098e569ac5d526e7c9da3744e08873be8c5b4f0f86ae73ab0c76`. Deployment, initialization, storage, retrieval and verification subsequently succeeded in NEAR Testnet's runtime. The deployed code hash is `6w8HmQ8uFQ3MewqU1Gnwk7JoKeAfmbeMBSQYdmzTukzZ`.
 
 The resolved dependency lockfile is retained at `deployment/companion.Cargo.lock`. To reproduce the source build (commands below use a POSIX shell; PowerShell equivalents are `Copy-Item` and the same Cargo commands):
 
@@ -113,13 +119,15 @@ cargo +1.100.0 build --locked --target wasm32-unknown-unknown --release
 
 Use the built artifact or the companion's reviewed CI artifact. If the companion source changes, repeat source review, build and validation for that revision before deploying.
 
-From the Thesis Engine repository root, this currently empty-code account can be deployed and initialized with [near-cli-rs](https://github.com/near/near-cli-rs/blob/main/docs/GUIDE.en.md):
+The deployment below is recorded for reproduction on an **empty, uninitialized account**. `redsigma.testnet` is now initialized: **do not rerun this command against its existing state**. The original deploy-and-initialize command, using [near-cli-rs](https://github.com/near/near-cli-rs/blob/main/docs/GUIDE.en.md), was:
 
 ```sh
 near contract deploy redsigma.testnet use-file ../near-sealed-log/contract/target/wasm32-unknown-unknown/release/sealed_log.wasm with-init-call new json-args '{"owner":"redsigma.testnet"}' prepaid-gas '100 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send
 ```
 
 This requires the account owner's wallet/keychain authorization for `redsigma.testnet`. Deployment and initialization are in one transaction. Recheck the account first: if another deployment has already initialized it, do not run `new` again or overwrite its state. A running dashboard needs no web build step; restart `python scripts/dashboard_server.py` after editing environment configuration. The local signing server is intended for a trusted local demo, not public hosting.
+
+MyNearWallet's old CLI connection flow is no longer accepting new connections following its [sunset](https://www.mynearwallet.com/sunset). Do not rely on that login URL to provision a signer. Use an existing authorized local credential or a supported wallet flow. Keep recovery input out of chat, source, process arguments and logs. The successful deployment used the native NEAR CLI executable with `sign-with-access-key-file`; the dashboard uses the same authorized credential through its configured local path.
 
 The alternative existing account `sealed-log-2026.testnet` was also checked on November 14, 2026: `get_owner` returned that account and `entry_count` returned 9, but `verify_entry`, `get_entry` and `get_entries_paginated` trapped with `WasmTrap(Unreachable)`. Pagination failed through both RPC providers. It is not a working fallback for this demonstration; the default remains `redsigma.testnet`.
 
@@ -173,4 +181,4 @@ Playwright uses its installed Chromium by default. To use an existing browser, s
 - Research: [THESIS.md](THESIS.md), including evidence against the hypothesis and what would change it.
 - Demo: `python scripts/dashboard_server.py`, then the seven-step workflow above.
 - Reproducible result: `python scripts/seal_results.py --prepare`; attach the result JSON and transaction/entry evidence after a successful Testnet round trip.
-- Outstanding submission dependencies: deploy the working companion WASM, authorize a Testnet signer, and supply real research credentials/data before presenting an empirically supported thesis. No submission upload or main-branch merge is performed by these scripts.
+- Live demonstration: deployed and verified on Testnet, entry 1, with transaction evidence above. Remaining research dependency: supply real source credentials/data before presenting an empirically supported thesis. No submission upload or main-branch merge is performed by these scripts.

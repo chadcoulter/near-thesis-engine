@@ -89,7 +89,8 @@ def main():
         if not result['verified_intact']:
             return 1
     else:
-        print(json.dumps(seal('thesis-result', payload), indent=2, ensure_ascii=False))
+        # Escaped JSON preserves Unicode content on Windows consoles with legacy encodings.
+        print(json.dumps(seal('thesis-result', payload), indent=2))
     return 0
 
 

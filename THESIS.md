@@ -68,7 +68,7 @@ python scripts/seal_results.py
 python scripts/seal_results.py --verify ENTRY_ID
 ```
 
-At the November 14, 2026 integration check, the account existed but had no contract code. No successful on-chain seal is claimed until deployment, signing and retrieval have actually completed. See README.md for the exact deployment/signing steps and CONTRACT_INTEGRATION.md for the inspected ABI.
+On November 14, 2026, the companion contract was built from source and deployed to `redsigma.testnet`, with owner `redsigma.testnet`, in Testnet transaction `CfqwJwujoueXKzu5vN5sHMDgAp53YYcWrTonp93WNNdn`. Deployment and initialization succeeded. Each thesis result must still be retrieved and compared individually; deployment alone does not verify a result or establish the research hypothesis. See README.md for the recorded live demonstration and CONTRACT_INTEGRATION.md for the inspected ABI.
 
 ## Dashboard
 

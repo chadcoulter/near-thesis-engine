@@ -1,4 +1,5 @@
 import datetime
+import io
 import hashlib
 from http.server import HTTPServer
 import json
@@ -149,6 +150,19 @@ def test_verification_rejects_non_boolean_response(monkeypatch):
     monkeypatch.setattr(seal_results,'near',lambda method,args: {'action_data':'x'} if method == 'get_entry' else 'true')
     with pytest.raises(RuntimeError,match='Invalid verification response'):
         seal_results.verify(1,'x')
+
+
+def test_cli_exports_unicode_on_legacy_windows_console(monkeypatch):
+    monkeypatch.setattr('sys.argv',['seal_results.py'])
+    monkeypatch.setattr(seal_results,'generate',lambda:{'thesis':'Unicode evidence: → 🚀'})
+    monkeypatch.setattr(seal_results,'seal',lambda label,payload:{'action_data':payload,'verified_intact':True})
+    buffer=io.BytesIO()
+    stdout=io.TextIOWrapper(buffer,encoding='cp1252')
+    monkeypatch.setattr('sys.stdout',stdout)
+    assert seal_results.main() == 0
+    stdout.flush()
+    record=json.loads(buffer.getvalue().decode('cp1252'))
+    assert json.loads(record['action_data'])['thesis'] == 'Unicode evidence: → 🚀'
 
 
 @pytest.fixture
