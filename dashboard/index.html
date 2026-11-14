@@ -38,7 +38,7 @@
 <div class="container">
   <header>
     <h1><span>NEAR Thesis Engine</span></h1>
-    <div class="subtitle">Cross-chain Intents volume as a leading indicator of real network usage vs token price — every data pull, chart, and conclusion is 231-gate sealed on NEAR.</div>
+    <div class="subtitle">Cross-chain Intents volume as a leading indicator of real network usage vs token price — the current demo evidence record is stored on NEAR with 231-gate checksums.</div>
   </div>
 
   <div id="demoBanner" class="demo-banner" style="display:none">
@@ -60,9 +60,9 @@
     <h3>How it works</h3>
     <p>1. <code>python3 scripts/fetch_data.py</code> — pulls NEAR BigQuery + Intents Explorer data (set INTENTS_API_JWT and GCP credentials for live data).</p>
     <p>2. <code>python3 scripts/build_charts.py</code> — rebuilds every chart from raw data.</p>
-    <p>3. <code>python3 scripts/seal_results.py</code> — seals data, charts, and thesis into the NEAR 231-gate sealed log at <code>sealed-log-2026.testnet</code>.</p>
-    <p>4. Verify any entry: <code>near view sealed-log-2026.testnet verify_entry '{"entry_id":&lt;id&gt;,"action_data":"&lt;data&gt;\"}'</code> → <code>true</code> intact, <code>false</code> tampered.</p>
-    <p class="hint">Track: thesis. Testnet-eligible (Q-010). Every number is traceable to a sealed entry — no invented figures.</p>
+    <p>3. <code>python3 scripts/seal_results.py</code> — seals data, charts, and thesis into the NEAR 231-gate sealed log at <code>redsigma.testnet</code>.</p>
+    <p>4. Verify any entry: <code>near view redsigma.testnet verify_entry '{"entry_id":&lt;id&gt;,"action_data":"&lt;data&gt;\"}'</code> → <code>true</code> intact, <code>false</code> tampered.</p>
+    <p class="hint">Track: thesis. Testnet-eligible (Q-010). Demo mode has no live figures; no invented results.</p>
   </div>
 </div>
 
@@ -89,8 +89,8 @@ async function loadJson(path) {
 }
 
 (async () => {
-  const manifest = await loadJson("charts/manifest.json");
-  const sealLog = await loadJson("scripts/seal_log.json");
+  const manifest = await loadJson("../charts/manifest.json");
+  const sealLog = await loadJson("../scripts/seal_log.json");
 
   const demo = manifest ? manifest.demo : false;
   document.getElementById("demoBanner").style.display = demo ? "block" : "none";
