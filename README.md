@@ -4,6 +4,8 @@ Built for the NEAR Hackathon 2026 **thesis** track. The research hypothesis is t
 
 The hypothesis remains **untested**: descriptive charts do not establish predictive power. Without data credentials, the engine reports missing evidence, generates no market figures, and still lets judges inspect and seal that explicitly incomplete research result.
 
+The expanded [research report](REPORT.md) presents the frozen real-data findings, a seven-day aligned comparison, exploratory correlations, counterarguments and a concrete predictive evaluation design. It is an analysis supplement written after entry 2 was sealed; it does not replace or change that recorded result. Rebuild the report offline with `python scripts/build_research_report.py`; the standalone HTML and calculation JSON are written to `artifacts/research-report/`.
+
 ## Architecture
 
 ```text
