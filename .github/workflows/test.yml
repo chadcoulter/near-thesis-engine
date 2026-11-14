@@ -1,0 +1,30 @@
+name: Thesis engine and dashboard
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: python -m pip install -r requirements-dev.txt
+      - run: npm ci
+      - run: python -m playwright install --with-deps chromium
+      - run: python scripts/verify.py
+      - run: python scripts/deep_edge_tests.py
+      - run: python -m pytest -q
+      - run: npm test
+      - run: python scripts/fetch_data.py
+      - run: python scripts/build_charts.py
+      - run: python scripts/seal_results.py --prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-thesis-demo-result
+          path: artifacts/

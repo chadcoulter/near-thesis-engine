@@ -1,149 +1,101 @@
 #!/usr/bin/env python3
-"""
-Seal thesis data, charts, and conclusions into the NEAR 231-gate sealed log.
+"""Seal the complete, canonical thesis result, without truncating evidence."""
+import argparse
+import datetime
+import hashlib
+import json
+import os
+import subprocess
+import sys
 
-Calls the deployed contract at sealed-log-2026.testnet:
-  store_entry(agent_id, action_data) -> entry_id
+from fetch_data import _load_env
+from thesis_result import ROOT, canonical, generate
 
-Each sealed entry gets SUM/LINEAR/PROD mod 231 checksums over action_data.
-Anyone can re-verify via verify_entry(entry_id, action_data) — any single-char
-change breaks the checksums (tamper detected).
-
-Writes scripts/seal_log.json with all entry IDs for the dashboard to reference.
-"""
-import json, os, shutil, subprocess, sys, datetime
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent.parent
-CONTRACT = os.environ.get("SEALED_LOG_CONTRACT", "sealed-log-2026.testnet")
-AGENT_ID = os.environ.get("SEALED_LOG_AGENT", "thesis-engine.testnet")
-SEAL_LOG = ROOT / "scripts" / "seal_log.json"
-MAX_PAYLOAD = 2000
+_load_env()
+SEAL_LOG = ROOT / 'scripts' / 'seal_log.json'
+MAX_PAYLOAD = 512_000  # Local safety limit; reject, never truncate.
 
 
-def _now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-
-def _check_near_cli():
-    if shutil.which("near") is None:
-        raise RuntimeError(
-            "near-cli not found. Install: npm install -g near-cli\n"
-            "Then login: near login\n"
-            "Set SEALED_LOG_CONTRACT and SEALED_LOG_AGENT env vars if needed."
-        )
-
-
-def _near_call(method: str, args: dict) -> str:
-    """Call a NEAR contract change method via near-cli. Returns raw stdout."""
-    _check_near_cli()
-    cmd = [
-        "near", "call", CONTRACT, method,
-        json.dumps(args, separators=(",", ":")),
-        "--accountId", AGENT_ID,
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    if result.returncode != 0:
-        raise RuntimeError(f"near call {method} failed: {result.stderr.strip()}")
-    lines = [l.strip() for l in result.stdout.strip().splitlines() if l.strip()]
-    if not lines:
-        raise RuntimeError(f"near call {method} returned no output")
-    return lines[-1]
-
-
-def _near_view(method: str, args: dict) -> str:
-    """Call a NEAR contract view method via near-cli. Returns raw stdout."""
-    _check_near_cli()
-    cmd = [
-        "near", "view", CONTRACT, method,
-        json.dumps(args, separators=(",", ":")),
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    if result.returncode != 0:
-        raise RuntimeError(f"near view {method} failed: {result.stderr.strip()}")
-    lines = [l.strip() for l in result.stdout.strip().splitlines() if l.strip()]
-    if not lines:
-        raise RuntimeError(f"near view {method} returned no output")
-    return lines[-1]
-
-
-def _truncate(label: str, payload: str) -> str:
-    if len(payload) <= MAX_PAYLOAD:
-        return payload
-    # Truncate at a newline boundary if possible, else hard cut
-    cut = payload[:MAX_PAYLOAD]
-    nl = cut.rfind("\n")
-    if nl > MAX_PAYLOAD * 0.8:
-        cut = cut[:nl]
-    return cut + f"\n...[truncated {len(payload) - len(cut)} chars]"
-
-
-def seal(label: str, payload: str) -> dict:
-    """Store one sealed entry; return the entry record."""
-    payload = _truncate(label, payload)
-    raw_id = _near_call("store_entry", {"agent_id": AGENT_ID, "action_data": payload})
+def near(method, args):
+    if os.environ.get('NEAR_NETWORK', 'testnet') != 'testnet':
+        raise ValueError('Only testnet is supported')
     try:
-        entry_id = int(raw_id)
-    except ValueError:
-        raise RuntimeError(f"store_entry returned non-numeric ID: {raw_id!r}")
+        proc = subprocess.run(['node', str(ROOT / 'scripts' / 'near_client.mjs')],
+                              input=canonical({'method': method, 'args': args}), capture_output=True,
+                              text=True, encoding='utf-8', timeout=180, cwd=ROOT)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError('NEAR timed out; transaction may have landed. Inspect testnet history before retrying.') from exc
+    try:
+        response = json.loads(proc.stdout)
+    except ValueError as exc:
+        raise RuntimeError('NEAR bridge failed to return JSON. Run npm ci and use Node >=22.22.2.') from exc
+    if proc.returncode or 'error' in response:
+        raise RuntimeError(response.get('error', 'NEAR bridge failed'))
+    return response['result']
 
-    # Verify immediately — proves the entry was stored correctly
-    intact_raw = _near_view("verify_entry", {"entry_id": entry_id, "action_data": payload})
-    intact = intact_raw.strip().lower() == "true"
-    return {
-        "label": label,
-        "entry_id": entry_id,
-        "action_data": payload,
-        "sealed_at": _now(),
-        "verified_intact": intact,
-    }
+
+def verify(entry_id, payload):
+    entry = near('get_entry', {'entry_id': entry_id})
+    response = near('verify_entry', {'entry_id': entry_id, 'action_data': payload})
+    if response is not None and type(response) is not bool:
+        raise RuntimeError('Invalid verification response')
+    return {'entry': entry, 'contract_verification': response,
+            'exact_match': entry is not None and entry.get('action_data') == payload,
+            'verified_intact': response is True and entry is not None and entry.get('action_data') == payload}
+
+
+def seal(label, payload):
+    if len(payload.encode('utf-8')) > MAX_PAYLOAD:
+        raise ValueError('Result exceeds 512000 UTF-8 bytes; reduce evidence scope explicitly. Nothing was submitted.')
+    # Read history before sending: an unreadable log must not cause an unrecorded transaction.
+    history = json.loads(SEAL_LOG.read_text(encoding='utf-8')) if SEAL_LOG.exists() else {'entries': []}
+    tx = near('store_entry', {'agent_id': os.environ.get('SEALED_LOG_AGENT', 'thesis-engine'), 'action_data': payload})
+    entry_id = tx.get('entry_id')
+    if type(entry_id) is not int or entry_id < 1 or not tx.get('transaction_id'):
+        raise RuntimeError('Invalid transaction result')
+    record = {'label': label, **tx, 'network': 'testnet',
+              'contract': os.environ.get('SEALED_LOG_CONTRACT', 'redsigma.testnet'),
+              'action_data': payload, 'sha256': hashlib.sha256(payload.encode('utf-8')).hexdigest(),
+              'sealed_at': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'verified_intact': False}
+    history['entries'].append(record)
+    SEAL_LOG.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding='utf-8')
+    try:
+        record.update(verify(entry_id, payload))
+        if not record['verified_intact']:
+            raise RuntimeError('Stored result failed verification or exact content comparison')
+    except Exception as exc:
+        record['verification_error'] = str(exc)
+        raise RuntimeError(f'Transaction {tx["transaction_id"]}, entry {entry_id} stored but verification failed: {exc}. Retrieve before resubmitting.') from exc
+    finally:
+        SEAL_LOG.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding='utf-8')
+    return record
 
 
 def main():
-    # Collect everything worth sealing
-    entries = []
-
-    # 1. Latest raw data pull
-    import glob
-    data_files = sorted(glob.glob(str(ROOT / "data" / "raw_*.json")))
-    if data_files:
-        with open(data_files[-1]) as f:
-            raw = f.read()
-        entries.append(("thesis-data-pull", raw))
-
-    # 2. Charts manifest
-    manifest_path = ROOT / "charts" / "manifest.json"
-    if manifest_path.exists():
-        with open(manifest_path) as f:
-            manifest = f.read()
-        entries.append(("thesis-charts-manifest", manifest))
-
-    # 3. THESIS.md conclusion
-    thesis_path = ROOT / "THESIS.md"
-    if thesis_path.exists():
-        with open(thesis_path) as f:
-            thesis = f.read()
-        entries.append(("thesis-conclusion", thesis))
-
-    if not entries:
-        print("Nothing to seal (no data, charts, or thesis found).")
-        return
-
-    results = []
-    for label, payload in entries:
-        try:
-            rec = seal(label, payload)
-            results.append(rec)
-            print(json.dumps(rec, indent=2))
-        except Exception as e:
-            print(f"ERROR sealing {label}: {e}", file=sys.stderr)
-            # Don't abort — seal what we can
-
-    with open(SEAL_LOG, "w") as f:
-        json.dump({"sealed_at": _now(), "entries": results}, f, indent=2)
-
-    print(f"\nSealed {len(results)}/{len(entries)} entries -> {SEAL_LOG}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--prepare', action='store_true', help='Write exact signing arguments without sending')
+    parser.add_argument('--verify', type=int, metavar='ENTRY_ID')
+    args = parser.parse_args()
+    payload = canonical(generate())
+    if args.prepare:
+        folder = ROOT / 'artifacts'
+        folder.mkdir(exist_ok=True)
+        (folder / 'result.json').write_text(payload, encoding='utf-8')
+        (folder / 'store_args.json').write_text(canonical({'agent_id': os.environ.get('SEALED_LOG_AGENT', 'thesis-engine'), 'action_data': payload}), encoding='utf-8')
+        print('Prepared artifacts/result.json and artifacts/store_args.json; no transaction sent')
+    elif args.verify is not None:
+        result = verify(args.verify, payload)
+        print(json.dumps(result, indent=2))
+        if not result['verified_intact']:
+            return 1
+    else:
+        print(json.dumps(seal('thesis-result', payload), indent=2, ensure_ascii=False))
+    return 0
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except Exception as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        sys.exit(1)

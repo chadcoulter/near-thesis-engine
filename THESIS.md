@@ -12,16 +12,16 @@ Token price is noisy, forward-looking, and easily manipulated. Cross-chain volum
 
 | Source | Table / Endpoint | SQL query | block_date filter |
 |---|---|---|---|
-| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us` | `SELECT block_date, COUNT(DISTINCT signer_id) as daily_active_accounts FROM \`bigquery-public-data.crypto_near_mainnet_us\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) GROUP BY block_date ORDER BY block_date` | Yes — `block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)` |
-| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us` | `SELECT block_date, COUNT(*) as tx_count FROM \`bigquery-public-data.crypto_near_mainnet_us\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) GROUP BY block_date ORDER BY block_date` | Yes — `block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)` |
-| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us` | `SELECT receiver_id, COUNT(*) as call_count FROM \`bigquery-public-data.crypto_near_mainnet_us\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND receiver_id IS NOT NULL GROUP BY receiver_id ORDER BY call_count DESC LIMIT 20` | Yes — `block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)` |
-| NEAR Intents Explorer API | `GET https://api.near-intents.org/v1/explorer/swap-volume` | N/A (API pull, not SQL) | N/A |
+| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us.transactions` | `SELECT block_date, COUNT(DISTINCT signer_account_id) as daily_active_accounts FROM \`bigquery-public-data.crypto_near_mainnet_us.transactions\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) GROUP BY block_date ORDER BY block_date` | Yes — `block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)` |
+| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us.transactions` | `SELECT block_date, COUNT(*) as tx_count FROM \`bigquery-public-data.crypto_near_mainnet_us.transactions\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) GROUP BY block_date ORDER BY block_date` | Yes — `block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)` |
+| NEAR BigQuery public dataset | `bigquery-public-data.crypto_near_mainnet_us.receipt_actions` | `SELECT receipt_receiver_account_id AS receiver_id, COUNT(*) AS call_count FROM \`bigquery-public-data.crypto_near_mainnet_us.receipt_actions\` WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND action_kind = 'FUNCTION_CALL' GROUP BY receiver_id ORDER BY call_count DESC LIMIT 20` | Yes - 7 days |
+| NEAR Intents Explorer API | `GET https://explorer.near-intents.org/api/v0/transactions` | N/A (API pull, not SQL) | N/A |
 
 Sample query (daily active accounts):
 
 ```sql
-SELECT block_date, COUNT(DISTINCT signer_id) as daily_active_accounts
-FROM `bigquery-public-data.crypto_near_mainnet_us`
+SELECT block_date, COUNT(DISTINCT signer_account_id) as daily_active_accounts
+FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`
 WHERE block_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
 GROUP BY block_date
 ORDER BY block_date
@@ -58,22 +58,23 @@ None reported yet — no live data has been fetched. The hypothesis is plausible
 
 ## Verification
 
-Every data pull, chart manifest, and thesis conclusion is sealed into the NEAR contract at `sealed-log-2026.testnet` via SUM/LINEAR/PRODUCT mod 231 checksums. Once live data is fetched, each pull is sealed immediately.
+Generate a canonical result containing this thesis, raw evidence, chart manifest and chart SHA-256 identifiers, then record the complete result at `redsigma.testnet` on NEAR Testnet. The original SUM/LINEAR/PRODUCT mod 231 algorithm remains unchanged. The application requires both a true contract verification response and exact equality between the candidate and retrieved `action_data`.
 
+```sh
+python scripts/seal_results.py --prepare
+python scripts/testnet_smoke.py
+# After contract deployment and local signer configuration:
+python scripts/seal_results.py
+python scripts/seal_results.py --verify ENTRY_ID
 ```
-# Verify a sealed entry is intact
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>"}'  → true
 
-# Tamper detection (change one char)
-near view sealed-log-2026.testnet verify_entry '{"entry_id":<id>,"action_data":"<data>!\"}'  → false
-```
+At the November 14, 2026 integration check, the account existed but had no contract code. No successful on-chain seal is claimed until deployment, signing and retrieval have actually completed. See README.md for the exact deployment/signing steps and CONTRACT_INTEGRATION.md for the inspected ABI.
 
 ## Dashboard
 
-Open `dashboard/index.html`. Shows each chart with:
-- The SQL query behind it (expandable)
-- One plain-sentence takeaway on what it shows
-- The sealed entry ID and verification status
+Run `python scripts/dashboard_server.py` and open `http://127.0.0.1:8000`. Generate or load a result; inspect its supporting evidence; submit it with a locally configured Testnet signer; inspect the transaction identifier; retrieve the entry; and verify the exact content. Missing data, missing entries, mismatches and RPC failures are displayed separately.
+
+The chart calculations remain descriptive. The Explorer adapter aggregates complete bounded windows of successful **1Click** swaps, not all Intents activity. It omits days without returned transactions and refuses partial totals when pagination fails or reaches its limit. Source errors remain visible in the result. The live credentialed data paths require GCP and partner API authorization; offline test fixtures are not research evidence.
 
 ## Known Limitations
 

@@ -1,149 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEAR Thesis Engine — Verifiable Onchain Thesis</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEAR Thesis Engine · Evidence to verification</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b0e11; color: #e8eaed; line-height: 1.5; padding: 24px; }
-  .container { max-width: 1000px; margin: 0 auto; }
-  header { border-bottom: 1px solid #2a2f38; padding-bottom: 20px; margin-bottom: 30px; }
-  h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-  h1 span { color: #64ffda; }
-  .subtitle { color: #94a3b8; font-size: 14px; }
-  .card { background: #111827; border: 1px solid #2a2f38; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-  .card h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 16px; }
-  .demo-banner { background: #7a2e0e; border: 1px solid #ea580c; color: #fdba74; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-  .chart-card { background: #0b0e11; border: 1px solid #2a2f38; border-radius: 8px; padding: 16px; }
-  .chart-card img { width: 100%; border-radius: 6px; background: #000; }
-  .chart-card h3 { font-size: 14px; margin: 12px 0 6px; color: #64ffda; }
-  .chart-card p { font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
-  .chart-card .source { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-  .seal { margin-top: 10px; padding: 8px; background: #0b0e11; border: 1px solid #2a2f38; border-radius: 6px; font-size: 12px; font-family: ui-monospace, monospace; }
-  .seal.ok { border-left: 3px solid #10b981; }
-  .seal.demo { border-left: 3px solid #f59e0b; }
-  .seal .lbl { color: #64748b; font-size: 11px; text-transform: uppercase; }
-  .seal .val { color: #e8eaed; }
-  .thesis { margin-top: 30px; }
-  .thesis h3 { font-size: 16px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-  .thesis pre { background: #0b0e11; border: 1px solid #2a2f38; border-radius: 8px; padding: 16px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; }
-  .how-it-works { color: #94a3b8; font-size: 13px; margin-top: 30px; }
-  .how-it-works code { color: #64ffda; font-family: ui-monospace, monospace; }
-  .error-msg { color: #ef4444; font-size: 13px; margin-top: 10px; }
+*{box-sizing:border-box}body{margin:0;background:#0b0e11;color:#e8eaed;font:16px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:32px 24px 70px}header{padding:20px 0 24px;border-bottom:1px solid #334155}h1{font-size:clamp(28px,5vw,44px);line-height:1.15;color:#64ffda}h2{font-size:21px}h3{font-size:17px}p{color:#b3c1d5}.eyebrow{letter-spacing:.1em;text-transform:uppercase;color:#64ffda;font-size:12px}section{background:#111827;border:1px solid #334155;border-radius:12px;padding:24px;margin:24px 0}button,.upload{background:#64ffda;color:#071412;border:0;border-radius:6px;padding:11px 15px;font:600 14px system-ui;cursor:pointer;display:inline-block;margin:5px 8px 5px 0}button:disabled{opacity:.5;cursor:wait}.upload{background:#29364a;color:#e8eaed}input[type=file]{max-width:100%;margin:8px}input[type=number]{background:#0b0e11;color:white;padding:10px;border:1px solid #64748b;border-radius:5px;width:130px}pre,textarea{background:#080d16;color:#cfdbed;padding:16px;border:1px solid #334155;border-radius:6px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:500px;overflow:auto;font:13px/1.6 ui-monospace,monospace}textarea{width:100%;min-height:180px}summary{cursor:pointer;color:#64ffda;padding:10px 0}#mode{color:#fdba74}#error{color:#ff9a9a;white-space:pre-wrap}#verification{font-weight:600;color:#64ffda;white-space:pre-wrap}#charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}article{min-width:0}img{width:100%}label{display:inline-block;margin:5px 12px 5px 0}code{color:#64ffda}a{color:#64ffda}footer{color:#94a3b8;font-size:13px}
 </style>
+<script src="/dashboard/app.js" defer></script>
 </head>
-<body>
-<div class="container">
-  <header>
-    <h1><span>NEAR Thesis Engine</span></h1>
-    <div class="subtitle">Cross-chain Intents volume as a leading indicator of real network usage vs token price — every data pull, chart, and conclusion is 231-gate sealed on NEAR.</div>
-  </div>
-
-  <div id="demoBanner" class="demo-banner" style="display:none">
-    <strong>DEMO MODE:</strong> No GCP credentials or Intents API JWT available. No data fetched — no figures produced (per track prompt: "Never invent numbers"). Configure credentials to fetch live onchain data.
-  </div>
-
-  <div class="card">
-    <h2>Charts</h2>
-    <div id="charts" class="grid">Loading…</div>
-    <div id="chartsError" class="error-msg"></div>
-  </div>
-
-  <div class="card thesis">
-    <h3>Thesis</h3>
-    <div id="thesis">Loading…</div>
-  </div>
-
-  <div class="how-it-works">
-    <h3>How it works</h3>
-    <p>1. <code>python3 scripts/fetch_data.py</code> — pulls NEAR BigQuery + Intents Explorer data (set INTENTS_API_JWT and GCP credentials for live data).</p>
-    <p>2. <code>python3 scripts/build_charts.py</code> — rebuilds every chart from raw data.</p>
-    <p>3. <code>python3 scripts/seal_results.py</code> — seals data, charts, and thesis into the NEAR 231-gate sealed log at <code>sealed-log-2026.testnet</code>.</p>
-    <p>4. Verify any entry: <code>near view sealed-log-2026.testnet verify_entry '{"entry_id":&lt;id&gt;,"action_data":"&lt;data&gt;\"}'</code> → <code>true</code> intact, <code>false</code> tampered.</p>
-    <p class="hint">Track: thesis. Testnet-eligible (Q-010). Every number is traceable to a sealed entry — no invented figures.</p>
-  </div>
-</div>
-
-<script>
-// HTML-escape helper to prevent XSS from injected data (queries, takeaways, action_data, etc.)
-function esc(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-async function loadJson(path) {
-  try {
-    const r = await fetch(path);
-    if (!r.ok) return null;
-    return r.json();
-  } catch (e) {
-    return null;
-  }
-}
-
-(async () => {
-  const manifest = await loadJson("charts/manifest.json");
-  const sealLog = await loadJson("scripts/seal_log.json");
-
-  const demo = manifest ? manifest.demo : false;
-  document.getElementById("demoBanner").style.display = demo ? "block" : "none";
-
-  const chartsEl = document.getElementById("charts");
-  const chartsError = document.getElementById("chartsError");
-
-  if (!manifest) {
-    chartsEl.innerHTML = '<p style="color:#94a3b8">No charts yet. Run: python3 scripts/fetch_data.py && python3 scripts/build_charts.py</p>';
-  } else if (manifest.error) {
-    chartsError.textContent = manifest.error;
-    chartsEl.innerHTML = '<p style="color:#94a3b8">Charts skipped.</p>';
-  } else if (!manifest.charts || manifest.charts.length === 0) {
-    chartsEl.innerHTML = demo
-      ? '<p style="color:#94a3b8">No data fetched yet (demo mode). Set INTENTS_API_JWT and GCP credentials, then run: python3 scripts/fetch_data.py && python3 scripts/build_charts.py</p>'
-      : '<p style="color:#94a3b8">No charts generated.</p>';
-  } else {
-    // Build a lookup of sealed entries by label (last entry wins if duplicates)
-    const sealedByLabel = {};
-    if (sealLog && sealLog.entries) {
-      for (const e of sealLog.entries) {
-        sealedByLabel[e.label] = e;
-      }
-    }
-
-    chartsEl.innerHTML = manifest.charts.map(c => {
-      const sealed = sealedByLabel[c.name] || null;
-      const intact = sealed ? (sealed.verified_intact ? "INTACT" : "TAMPERED") : "NOT SEALED";
-      const sealClass = sealed && sealed.verified_intact ? "ok" : (sealed ? "demo" : "");
-      const actionPreview = sealed ? esc(sealed.action_data.slice(0, 80)) : '—';
-      return `
-        <div class="chart-card">
-          <img src="${esc(c.path)}" alt="${esc(c.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-          <div style="display:none; color:#94a3b8; font-size:12px;">Image not available</div>
-          <h3>${esc(c.name.replace(/_/g, ' '))}</h3>
-          <p><strong>Takeaway:</strong> ${esc(c.takeaway || '')}</p>
-          <div class="source">Source: ${esc(c.source)}</div>
-          <details style="margin-top:10px;">
-            <summary style="color:#64ffda; cursor:pointer; font-size:12px;">Show SQL query</summary>
-            <pre style="font-size:11px; background:#0b0e11; border:1px solid #2a2f38; border-radius:6px; padding:8px; margin-top:6px; overflow-x:auto; white-space:pre-wrap; color:#94a3b8;">${esc(c.query || '')}</pre>
-          </details>
-          <div class="seal ${sealClass}">
-            <div class="lbl">Sealed entry #${sealed ? esc(sealed.entry_id) : '—'} — ${esc(intact)}</div>
-            <div class="val">${actionPreview}…</div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  const thesisEl = document.getElementById("thesis");
-  thesisEl.innerHTML = '<pre style="color:#94a3b8">Read THESIS.md — the claim, evidence for, evidence against, and what would change my mind. Every figure above is traceable to a sealed entry.</pre>';
-})();
-</script>
-</body>
-</html>
+<body><main>
+<header><div class="eyebrow">NEAR Hackathon 2026 · Thesis track</div>
+<h1>From thesis to verifiable evidence.</h1>
+<p>Research hypothesis: cross-chain Intents volume is a better leading indicator of real NEAR usage than token price. Inspect the evidence, record a result, and compare it with the public record.</p>
+<strong id="network">Loading network configuration…</strong><p id="signing"></p></header>
+<p id="error" role="alert" aria-live="assertive"></p>
+<section><h2>1. Generate or load a research result</h2>
+<p>Generate rebuilds charts from the latest local data pull and packages the thesis with its sources, queries, takeaways, raw evidence and chart hashes. Without credentials, it produces an explicitly incomplete research result.</p>
+<button id="generate">Generate result</button><label class="upload">Load result JSON <input id="load" type="file" accept=".json,application/json"></label><button id="download">Download result</button>
+<p id="mode"></p><p id="researchStatus"></p>
+<details><summary>Read the thesis, counterarguments and limitations</summary><pre id="thesis"></pre></details>
+<details><summary>Inspect supporting evidence and source errors</summary><pre id="evidence"></pre></details>
+<div id="charts"></div></section>
+<section><h2>2. Record the displayed result on Testnet</h2>
+<p>Submit stores the complete result string with <code>store_entry</code>, waits for final execution, then retrieves and verifies it. The signing key stays on the local machine. No payload is silently truncated.</p>
+<button id="seal">Submit to Sealed Log</button><pre id="transaction">No transaction submitted in this session.</pre></section>
+<section><h2>3. Retrieve and independently verify</h2>
+<p>Enter an entry ID and compare its public record with the candidate result below. Edit a character to demonstrate mismatch detection. A passing contract checksum alone is insufficient: this demonstration also requires exact content equality.</p>
+<label>Entry ID <input id="entryId" type="number" min="1" step="1"></label><button id="verify">Retrieve + verify</button>
+<label for="candidate">Candidate result (editable for tamper demonstration)</label><textarea id="candidate" spellcheck="false"></textarea>
+<p id="verification" role="status" aria-live="polite"></p>
+<details><summary>Inspect recorded entry, signer and checksums</summary><pre id="record">No record retrieved yet.</pre></details></section>
+<section><h2>4. Browse the public ledger</h2>
+<label>Starting ID <input id="from" type="number" min="1" value="1"></label><button id="ledger">Load ledger page</button>
+<pre id="entries">The ledger uses entry_count and get_entries_paginated(from, limit). Each page contains at most 10 entries.</pre></section>
+<footer>Sealed Log's 231-gate algorithm is preserved. It has known collisions and does not prove a thesis is correct or data were not cherry-picked. Exact retrieval comparison strengthens this demonstration; SHA-256 identifies local artifacts. Read THESIS.md for the research limitations.</footer>
+</main></body></html>

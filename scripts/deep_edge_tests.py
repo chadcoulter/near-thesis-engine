@@ -35,6 +35,8 @@ check("demo mode is True", fetch_data.IS_DEMO == True)
 # ── Test 3: build_charts.py with empty data ─────────────────────────
 print("\n=== build_charts.py empty data ===")
 import build_charts
+chart_scratch = tempfile.TemporaryDirectory(prefix='thesis-edge-charts-')
+build_charts.CHARTS_DIR = Path(chart_scratch.name)
 empty_bundle = {"demo": True, "fetched_at": "2026-01-01T00:00:00+00:00", "sources": []}
 manifest = build_charts.build(empty_bundle)
 check("empty bundle returns manifest", "charts" in manifest)
@@ -100,21 +102,16 @@ for c in manifest3["charts"]:
     check(f"chart {c['name']} takeaway not hardcoded", "rhea.finance" not in c.get("takeaway", "") or c["name"] == "contract_usage")
 
 # ── Test 6: seal_results.py truncation ──────────────────────────────
-print("\n=== seal_results.py truncation ===")
+print("\n=== seal_results.py full payload preservation ===")
 import seal_results
-short = "hello"
-check("short payload unchanged", seal_results._truncate("test", short) == short)
-
-long_payload = "x" * 5000
-truncated = seal_results._truncate("test", long_payload)
-check("long payload truncated to <= 2026", len(truncated) <= 2026, f"got {len(truncated)}")
-check("truncation notice present", "[truncated" in truncated)
-
-# Truncation at newline boundary
-nl_payload = "a" * 1000 + "\n" + "b" * 1500 + "\n" + "c" * 100
-trunc_nl = seal_results._truncate("test", nl_payload)
-check("newline boundary truncation", len(trunc_nl) <= 2026)
-check("newline boundary has notice", "[truncated" in trunc_nl)
+from thesis_result import canonical
+long_payload = "🚀" * 5000 + "\ncomplete evidence"
+check("long Unicode evidence preserved through serialization", json.loads(canonical(long_payload)) == long_payload)
+try:
+    seal_results.seal('oversize-test', '🚀' * (seal_results.MAX_PAYLOAD // 4 + 1))
+    check('oversized evidence rejected before sending', False)
+except ValueError:
+    check('oversized evidence rejected before sending', True)
 
 # ── Test 7: verify.py edge cases ────────────────────────────────────
 print("\n=== verify.py edge cases ===")
@@ -170,7 +167,7 @@ check(f"single-byte change detection rate: {detected}/{total_tests} = {detection
 # ── Test 8: THESIS.md has no invented numbers ───────────────────────
 print("\n=== THESIS.md no invented numbers ===")
 thesis_path = ROOT / "THESIS.md"
-with open(thesis_path) as f:
+with open(thesis_path, encoding='utf-8') as f:
     thesis = f.read()
 # Check for the specific invented numbers from before
 check("no '1,240 → 1,420' invented figure", "1,240" not in thesis)
@@ -182,20 +179,16 @@ check("has 'could NOT be computed' section", "could NOT be computed" in thesis)
 # ── Test 9: Dashboard XSS escaping ──────────────────────────────────
 print("\n=== dashboard XSS escaping ===")
 dashboard_path = ROOT / "dashboard" / "index.html"
-with open(dashboard_path) as f:
+with open(dashboard_path, encoding='utf-8') as f:
     dashboard = f.read()
-check("has esc() function", "function esc(str)" in dashboard)
-check("esc() applied to chart name", "esc(c.name" in dashboard)
-check("esc() applied to takeaway", "esc(c.takeaway" in dashboard)
-check("esc() applied to query", "esc(c.query" in dashboard)
-check("esc() applied to source", "esc(c.source" in dashboard)
-check("esc() applied to action_data", "esc(sealed.action_data" in dashboard)
-check("esc() applied to entry_id", "esc(sealed.entry_id" in dashboard)
-check("esc() applied to intact", "esc(intact" in dashboard)
-check("esc() applied to path", "esc(c.path" in dashboard)
+app = (ROOT / 'dashboard' / 'app.js').read_text(encoding='utf-8')
+check('dashboard renders dynamic text without HTML interpolation', 'textContent' in app and 'innerHTML' not in app)
+check('dashboard loads external app script', '/dashboard/app.js' in dashboard)
+# Browser execution and malicious result rendering are tested in tests/test_dashboard.py.
 
 print()
 if errors:
     print(f"{len(errors)} TEST(S) FAILED: {errors}")
     sys.exit(1)
 print("ALL DEEP EDGE-CASE TESTS PASSED")
+chart_scratch.cleanup()
