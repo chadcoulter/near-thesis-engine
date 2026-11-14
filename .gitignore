@@ -1,0 +1,14 @@
+.venv/
+.tmp/
+node_modules/
+__pycache__/
+.pytest_cache/
+pytest-cache-files-*/
+.env
+.env.*
+!.env.example
+*credentials*.json
+data/
+charts/
+scripts/seal_log.json
+artifacts/

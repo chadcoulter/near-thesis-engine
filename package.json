@@ -1,0 +1,27 @@
+{
+  "name": "near-thesis-engine",
+  "version": "1.0.0",
+  "description": "Reproducible NEAR thesis research with Testnet evidence verification",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/near_client.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chadcoulter/near-thesis-engine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/chadcoulter/near-thesis-engine/issues"
+  },
+  "homepage": "https://github.com/chadcoulter/near-thesis-engine#readme",
+  "dependencies": {
+    "near-api-js": "7.4.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
