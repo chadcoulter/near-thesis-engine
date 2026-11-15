@@ -1,0 +1,13 @@
+{
+  "source": "CoinGecko NEAR/USD aggregate reference price",
+  "endpoint": "https://api.coingecko.com/api/v3/coins/near/market_chart/range",
+  "params": {
+    "vs_currency": "usd",
+    "from": 1786752000,
+    "to": 1794614400
+  },
+  "fetched_at": "2026-11-15T09:27:34.850821+00:00",
+  "response_sha256": "07a174ccee4702376f0abb32f7efc8daf0b8ba59d831bff801cc0a322f536f29",
+  "documentation": "https://docs.coingecko.com/v3.0.1/reference/coins-id-market-chart-range",
+  "note": "Daily 00:00 UTC observations. Price for day t is the observation exactly at t+1 midnight, available by the forecast cutoff. No daily OHLC close is claimed."
+}

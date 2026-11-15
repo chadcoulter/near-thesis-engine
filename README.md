@@ -2,9 +2,22 @@
 
 Built for the NEAR Hackathon 2026 **thesis** track. The research hypothesis is that cross-chain Intents volume is a better leading indicator of real NEAR usage than token price. The engine preserves the original thesis, counterarguments, chart calculations and 231-gate verification algorithm, and packages their evidence into a reproducible result that can be recorded and checked on NEAR Testnet.
 
-The hypothesis remains **untested**: descriptive charts do not establish predictive power. Without data credentials, the engine reports missing evidence, generates no market figures, and still lets judges inspect and seal that explicitly incomplete research result.
+The original submission's descriptive charts do not establish predictive power. The post-deadline 90-day comparison below tests the hypothesis but does not establish it. Without data credentials, the engine reports missing evidence, generates no market figures, and still lets judges inspect and seal that explicitly incomplete research result.
 
 The expanded [research report](REPORT.md) presents the frozen real-data findings, a seven-day aligned comparison, exploratory correlations, counterarguments and a concrete predictive evaluation design. It is an analysis supplement written after entry 2 was sealed; it does not replace or change that recorded result. Rebuild the report offline with `python scripts/build_research_report.py`; the standalone HTML and calculation JSON are written to `artifacts/research-report/`.
+
+## Completed 90-day predictive comparison — post-deadline extension
+
+The [90-day comparison](research/comparison-90d/PREDICTIVE-COMPARISON.md) tests next-day network usage using 1,942,354 successful swaps, BigQuery activity and NEAR/USD reference prices. It evaluates 37 future dates with expanding-window fits, usage-only and persistence baselines, and paired error uncertainty. Intents has lower MAE than price by 1.58% for active signers and 10.07% for transactions, but both uncertainty intervals include zero. Intents also fails to improve on usage-only MAE. The tested hypothesis is therefore **not established by this experiment**.
+
+This work was completed after the hackathon deadline on a separate research branch. Entry 2 and the original submission snapshot are unchanged. Frozen aggregate inputs are included for offline reproduction:
+
+```sh
+python scripts/compare_predictors.py --output-dir artifacts/comparison-90d
+python -m pytest tests/test_comparison.py -q
+```
+
+The full 33-part swap audit archive (254,910,387 compressed bytes) is retained locally rather than committed again. Its source manifest contains each file's checksum. To recollect it with your own Explorer JWT, run `python scripts/fetch_intents_history.py --start-date 2026-08-16 --end-date 2026-11-14 --max-pages 10000`. The Explorer allows one request per five seconds, so collecting all 1,943 pages takes hours. `python scripts/fetch_comparison_data.py` retrieves the corresponding BigQuery and price inputs; the saved BigQuery query uses a 20 GB dry-run/execution cap and does not enable billing. The historical evaluation uses revised source snapshots rather than real-time publication vintages; details are in the report.
 
 ## Architecture
 

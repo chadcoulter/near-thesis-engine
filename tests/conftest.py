@@ -10,6 +10,8 @@ os.environ.setdefault('MPLCONFIGDIR', str(ROOT / '.tmp' / 'matplotlib'))
 
 @pytest.fixture(autouse=True)
 def isolate_live_configuration(monkeypatch):
+    # A local frozen research date must not change tests using relative UTC days.
+    monkeypatch.delenv('DATA_AS_OF_DATE', raising=False)
     monkeypatch.setenv('INTENTS_EVIDENCE_MODE', 'inline')
     monkeypatch.setenv('BQ_MAX_BYTES_BILLED', '20000000000')
     monkeypatch.setenv('BQ_MAX_TOTAL_BYTES', '60000000000')

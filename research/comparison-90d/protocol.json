@@ -1,0 +1,33 @@
+{
+  "start_inclusive": "2026-08-16",
+  "end_exclusive": "2026-11-14",
+  "initial_train_pairs": 45,
+  "feature_start_index": 7,
+  "ridge_alpha": 1.0,
+  "target": "next-day log1p usage; errors measured on original counts",
+  "usage_features": [
+    "log1p usage t",
+    "log1p usage t-1",
+    "log1p usage t-7",
+    "target weekday sine",
+    "target weekday cosine"
+  ],
+  "price_features": [
+    "log price at t+1 midnight UTC",
+    "log one-day price return"
+  ],
+  "intents_features": [
+    "log1p daily inbound USD volume",
+    "one-day log1p volume change"
+  ],
+  "primary_metric": "MAE",
+  "targets": [
+    "daily_active_accounts",
+    "tx_count"
+  ],
+  "uncertainty": "paired circular moving-block bootstrap of daily absolute-error differences",
+  "bootstrap_block_days": 7,
+  "bootstrap_resamples": 5000,
+  "bootstrap_seed": 20261115,
+  "note": "Fixed before fitting this comparison, not externally preregistered. No tuning or model selection on holdout."
+}
