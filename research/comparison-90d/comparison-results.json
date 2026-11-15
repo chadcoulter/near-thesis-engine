@@ -1,0 +1,145 @@
+{
+  "protocol": {
+    "start_inclusive": "2026-08-16",
+    "end_exclusive": "2026-11-14",
+    "initial_train_pairs": 45,
+    "feature_start_index": 7,
+    "ridge_alpha": 1.0,
+    "target": "next-day log1p usage; errors measured on original counts",
+    "usage_features": [
+      "log1p usage t",
+      "log1p usage t-1",
+      "log1p usage t-7",
+      "target weekday sine",
+      "target weekday cosine"
+    ],
+    "price_features": [
+      "log price at t+1 midnight UTC",
+      "log one-day price return"
+    ],
+    "intents_features": [
+      "log1p daily inbound USD volume",
+      "one-day log1p volume change"
+    ],
+    "primary_metric": "MAE",
+    "targets": [
+      "daily_active_accounts",
+      "tx_count"
+    ],
+    "uncertainty": "paired circular moving-block bootstrap of daily absolute-error differences",
+    "bootstrap_block_days": 7,
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 20261115,
+    "note": "Fixed before fitting this comparison, not externally preregistered. No tuning or model selection on holdout."
+  },
+  "source_hashes": {
+    "data/comparison-90d/network.json": "cf983d39ac17b631ad4d4efe4a888eb7680e3a20c769d842369f65842b5b56c4",
+    "data/comparison-90d/price-response.json": "07a174ccee4702376f0abb32f7efc8daf0b8ba59d831bff801cc0a322f536f29",
+    "data/intents-evidence/2026-08-16_2026-11-14/source.json": "bd656cf5ad97fba90a7e074ca4bb18b826a6889503ae30bb273e1de304fe5fa1"
+  },
+  "aligned_days": 90,
+  "swap_records": 1942354,
+  "total_intents_usd_decimal": "3927512808.354047983516",
+  "first_forecast_date": "2026-10-08",
+  "last_forecast_date": "2026-11-13",
+  "results": {
+    "daily_active_accounts": {
+      "forecast_days": 37,
+      "metrics": {
+        "persistence": {
+          "mae": 11555.0,
+          "rmse": 28716.344591115278
+        },
+        "seasonal_persistence": {
+          "mae": 25922.64864864865,
+          "rmse": 44010.229308466274
+        },
+        "usage": {
+          "mae": 13416.296686889697,
+          "rmse": 28848.716658108635
+        },
+        "usage_price": {
+          "mae": 14162.141005979263,
+          "rmse": 29434.56741412152
+        },
+        "usage_intents": {
+          "mae": 13938.887874164633,
+          "rmse": 29632.20806522124
+        },
+        "usage_price_intents": {
+          "mae": 14771.01716654276,
+          "rmse": 30277.502486134577
+        }
+      },
+      "intents_vs": {
+        "usage": {
+          "mae_reduction_pct": -3.895197009064422,
+          "mean_absolute_error_advantage": -522.5911872749381,
+          "block_bootstrap_95pct_interval": [
+            -1143.9275737770045,
+            51.23111049645372
+          ]
+        },
+        "usage_price": {
+          "mae_reduction_pct": 1.5764080566658154,
+          "mean_absolute_error_advantage": 223.2531318146308,
+          "block_bootstrap_95pct_interval": [
+            -519.9124339411396,
+            1109.5362634479964
+          ]
+        }
+      },
+      "primary_direction": "intents_lower_MAE"
+    },
+    "tx_count": {
+      "forecast_days": 37,
+      "metrics": {
+        "persistence": {
+          "mae": 103047.78378378379,
+          "rmse": 140551.46996068064
+        },
+        "seasonal_persistence": {
+          "mae": 153288.56756756757,
+          "rmse": 195087.39391450013
+        },
+        "usage": {
+          "mae": 108230.50087291775,
+          "rmse": 134890.25422614816
+        },
+        "usage_price": {
+          "mae": 120363.9607224955,
+          "rmse": 146019.4608483303
+        },
+        "usage_intents": {
+          "mae": 108240.32289004045,
+          "rmse": 137411.56959433728
+        },
+        "usage_price_intents": {
+          "mae": 121273.69143412825,
+          "rmse": 148808.90329974878
+        }
+      },
+      "intents_vs": {
+        "usage": {
+          "mae_reduction_pct": -0.009075091627112744,
+          "mean_absolute_error_advantage": -9.82201712268304,
+          "block_bootstrap_95pct_interval": [
+            -3484.4299419124645,
+            3888.5812633883106
+          ]
+        },
+        "usage_price": {
+          "mae_reduction_pct": 10.072481629618883,
+          "mean_absolute_error_advantage": 12123.637832455048,
+          "block_bootstrap_95pct_interval": [
+            -20432.988646133505,
+            44653.68523064728
+          ]
+        }
+      },
+      "primary_direction": "intents_lower_MAE"
+    }
+  },
+  "sealed": false,
+  "status": "Post-deadline research extension; original entry 2 is unchanged"
+}

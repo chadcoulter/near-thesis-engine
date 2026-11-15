@@ -1,0 +1,462 @@
+{
+  "source": "NEAR BigQuery public transactions",
+  "query": "SELECT block_date, COUNT(*) AS tx_count,\n    COUNT(DISTINCT signer_account_id) AS daily_active_accounts\n    FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`\n    WHERE block_date >= @start_date AND block_date < @end_date\n    GROUP BY block_date ORDER BY block_date",
+  "start_inclusive": "2026-08-16",
+  "end_exclusive": "2026-11-14",
+  "fetched_at": "2026-11-15T09:27:34.353217+00:00",
+  "job_id": "8cf16828-76cf-4f23-b738-ff68f5890420",
+  "bytes_processed": 2013580367,
+  "dry_run_bytes": 2013580367,
+  "rows": [
+    {
+      "block_date": "2026-08-16",
+      "tx_count": 615151,
+      "daily_active_accounts": 80163
+    },
+    {
+      "block_date": "2026-08-17",
+      "tx_count": 669250,
+      "daily_active_accounts": 80576
+    },
+    {
+      "block_date": "2026-08-18",
+      "tx_count": 673834,
+      "daily_active_accounts": 80055
+    },
+    {
+      "block_date": "2026-08-19",
+      "tx_count": 733400,
+      "daily_active_accounts": 80931
+    },
+    {
+      "block_date": "2026-08-20",
+      "tx_count": 758797,
+      "daily_active_accounts": 82216
+    },
+    {
+      "block_date": "2026-08-21",
+      "tx_count": 786077,
+      "daily_active_accounts": 81667
+    },
+    {
+      "block_date": "2026-08-22",
+      "tx_count": 804701,
+      "daily_active_accounts": 79636
+    },
+    {
+      "block_date": "2026-08-23",
+      "tx_count": 726225,
+      "daily_active_accounts": 79394
+    },
+    {
+      "block_date": "2026-08-24",
+      "tx_count": 805717,
+      "daily_active_accounts": 81373
+    },
+    {
+      "block_date": "2026-08-25",
+      "tx_count": 719568,
+      "daily_active_accounts": 79464
+    },
+    {
+      "block_date": "2026-08-26",
+      "tx_count": 655345,
+      "daily_active_accounts": 81506
+    },
+    {
+      "block_date": "2026-08-27",
+      "tx_count": 681264,
+      "daily_active_accounts": 81525
+    },
+    {
+      "block_date": "2026-08-28",
+      "tx_count": 654889,
+      "daily_active_accounts": 78375
+    },
+    {
+      "block_date": "2026-08-29",
+      "tx_count": 594141,
+      "daily_active_accounts": 76934
+    },
+    {
+      "block_date": "2026-08-30",
+      "tx_count": 623892,
+      "daily_active_accounts": 76955
+    },
+    {
+      "block_date": "2026-08-31",
+      "tx_count": 684883,
+      "daily_active_accounts": 77790
+    },
+    {
+      "block_date": "2026-09-01",
+      "tx_count": 670529,
+      "daily_active_accounts": 77130
+    },
+    {
+      "block_date": "2026-09-02",
+      "tx_count": 659622,
+      "daily_active_accounts": 77127
+    },
+    {
+      "block_date": "2026-09-03",
+      "tx_count": 703698,
+      "daily_active_accounts": 77607
+    },
+    {
+      "block_date": "2026-09-04",
+      "tx_count": 735463,
+      "daily_active_accounts": 76042
+    },
+    {
+      "block_date": "2026-09-05",
+      "tx_count": 674162,
+      "daily_active_accounts": 74288
+    },
+    {
+      "block_date": "2026-09-06",
+      "tx_count": 763172,
+      "daily_active_accounts": 74652
+    },
+    {
+      "block_date": "2026-09-07",
+      "tx_count": 746044,
+      "daily_active_accounts": 75711
+    },
+    {
+      "block_date": "2026-09-08",
+      "tx_count": 704254,
+      "daily_active_accounts": 71768
+    },
+    {
+      "block_date": "2026-09-09",
+      "tx_count": 772841,
+      "daily_active_accounts": 71964
+    },
+    {
+      "block_date": "2026-09-10",
+      "tx_count": 728736,
+      "daily_active_accounts": 71159
+    },
+    {
+      "block_date": "2026-09-11",
+      "tx_count": 846582,
+      "daily_active_accounts": 70014
+    },
+    {
+      "block_date": "2026-09-12",
+      "tx_count": 651970,
+      "daily_active_accounts": 67170
+    },
+    {
+      "block_date": "2026-09-13",
+      "tx_count": 626447,
+      "daily_active_accounts": 61501
+    },
+    {
+      "block_date": "2026-09-14",
+      "tx_count": 706600,
+      "daily_active_accounts": 49972
+    },
+    {
+      "block_date": "2026-09-15",
+      "tx_count": 706597,
+      "daily_active_accounts": 45247
+    },
+    {
+      "block_date": "2026-09-16",
+      "tx_count": 777089,
+      "daily_active_accounts": 42517
+    },
+    {
+      "block_date": "2026-09-17",
+      "tx_count": 840314,
+      "daily_active_accounts": 44749
+    },
+    {
+      "block_date": "2026-09-18",
+      "tx_count": 973388,
+      "daily_active_accounts": 62965
+    },
+    {
+      "block_date": "2026-09-19",
+      "tx_count": 839380,
+      "daily_active_accounts": 52391
+    },
+    {
+      "block_date": "2026-09-20",
+      "tx_count": 846013,
+      "daily_active_accounts": 57466
+    },
+    {
+      "block_date": "2026-09-21",
+      "tx_count": 871723,
+      "daily_active_accounts": 60298
+    },
+    {
+      "block_date": "2026-09-22",
+      "tx_count": 971959,
+      "daily_active_accounts": 57797
+    },
+    {
+      "block_date": "2026-09-23",
+      "tx_count": 869892,
+      "daily_active_accounts": 56105
+    },
+    {
+      "block_date": "2026-09-24",
+      "tx_count": 741291,
+      "daily_active_accounts": 54027
+    },
+    {
+      "block_date": "2026-09-25",
+      "tx_count": 715469,
+      "daily_active_accounts": 57300
+    },
+    {
+      "block_date": "2026-09-26",
+      "tx_count": 603143,
+      "daily_active_accounts": 54118
+    },
+    {
+      "block_date": "2026-09-27",
+      "tx_count": 1217209,
+      "daily_active_accounts": 63589
+    },
+    {
+      "block_date": "2026-09-28",
+      "tx_count": 1129793,
+      "daily_active_accounts": 61771
+    },
+    {
+      "block_date": "2026-09-29",
+      "tx_count": 987627,
+      "daily_active_accounts": 62990
+    },
+    {
+      "block_date": "2026-09-30",
+      "tx_count": 923526,
+      "daily_active_accounts": 58749
+    },
+    {
+      "block_date": "2026-10-01",
+      "tx_count": 1151492,
+      "daily_active_accounts": 62105
+    },
+    {
+      "block_date": "2026-10-02",
+      "tx_count": 868026,
+      "daily_active_accounts": 118077
+    },
+    {
+      "block_date": "2026-10-03",
+      "tx_count": 690438,
+      "daily_active_accounts": 176719
+    },
+    {
+      "block_date": "2026-10-04",
+      "tx_count": 839450,
+      "daily_active_accounts": 177196
+    },
+    {
+      "block_date": "2026-10-05",
+      "tx_count": 865681,
+      "daily_active_accounts": 95992
+    },
+    {
+      "block_date": "2026-10-06",
+      "tx_count": 909765,
+      "daily_active_accounts": 124809
+    },
+    {
+      "block_date": "2026-10-07",
+      "tx_count": 971068,
+      "daily_active_accounts": 175774
+    },
+    {
+      "block_date": "2026-10-08",
+      "tx_count": 1014850,
+      "daily_active_accounts": 82447
+    },
+    {
+      "block_date": "2026-10-09",
+      "tx_count": 680332,
+      "daily_active_accounts": 53950
+    },
+    {
+      "block_date": "2026-10-10",
+      "tx_count": 850344,
+      "daily_active_accounts": 56881
+    },
+    {
+      "block_date": "2026-10-11",
+      "tx_count": 1109584,
+      "daily_active_accounts": 54865
+    },
+    {
+      "block_date": "2026-10-12",
+      "tx_count": 712621,
+      "daily_active_accounts": 59164
+    },
+    {
+      "block_date": "2026-10-13",
+      "tx_count": 731054,
+      "daily_active_accounts": 55685
+    },
+    {
+      "block_date": "2026-10-14",
+      "tx_count": 767812,
+      "daily_active_accounts": 58615
+    },
+    {
+      "block_date": "2026-10-15",
+      "tx_count": 911980,
+      "daily_active_accounts": 55503
+    },
+    {
+      "block_date": "2026-10-16",
+      "tx_count": 658427,
+      "daily_active_accounts": 54936
+    },
+    {
+      "block_date": "2026-10-17",
+      "tx_count": 557903,
+      "daily_active_accounts": 54322
+    },
+    {
+      "block_date": "2026-10-18",
+      "tx_count": 569735,
+      "daily_active_accounts": 51810
+    },
+    {
+      "block_date": "2026-10-19",
+      "tx_count": 607019,
+      "daily_active_accounts": 53107
+    },
+    {
+      "block_date": "2026-10-20",
+      "tx_count": 617990,
+      "daily_active_accounts": 52116
+    },
+    {
+      "block_date": "2026-10-21",
+      "tx_count": 658784,
+      "daily_active_accounts": 53919
+    },
+    {
+      "block_date": "2026-10-22",
+      "tx_count": 547267,
+      "daily_active_accounts": 51423
+    },
+    {
+      "block_date": "2026-10-23",
+      "tx_count": 609236,
+      "daily_active_accounts": 51214
+    },
+    {
+      "block_date": "2026-10-24",
+      "tx_count": 635438,
+      "daily_active_accounts": 50178
+    },
+    {
+      "block_date": "2026-10-25",
+      "tx_count": 550250,
+      "daily_active_accounts": 49245
+    },
+    {
+      "block_date": "2026-10-26",
+      "tx_count": 573801,
+      "daily_active_accounts": 49601
+    },
+    {
+      "block_date": "2026-10-27",
+      "tx_count": 604320,
+      "daily_active_accounts": 61855
+    },
+    {
+      "block_date": "2026-10-28",
+      "tx_count": 520096,
+      "daily_active_accounts": 49273
+    },
+    {
+      "block_date": "2026-10-29",
+      "tx_count": 649103,
+      "daily_active_accounts": 49292
+    },
+    {
+      "block_date": "2026-10-30",
+      "tx_count": 691420,
+      "daily_active_accounts": 47349
+    },
+    {
+      "block_date": "2026-10-31",
+      "tx_count": 502649,
+      "daily_active_accounts": 46019
+    },
+    {
+      "block_date": "2026-11-01",
+      "tx_count": 509345,
+      "daily_active_accounts": 46478
+    },
+    {
+      "block_date": "2026-11-02",
+      "tx_count": 522358,
+      "daily_active_accounts": 48060
+    },
+    {
+      "block_date": "2026-11-03",
+      "tx_count": 597189,
+      "daily_active_accounts": 72343
+    },
+    {
+      "block_date": "2026-11-04",
+      "tx_count": 706690,
+      "daily_active_accounts": 79164
+    },
+    {
+      "block_date": "2026-11-05",
+      "tx_count": 848794,
+      "daily_active_accounts": 78560
+    },
+    {
+      "block_date": "2026-11-06",
+      "tx_count": 717484,
+      "daily_active_accounts": 78574
+    },
+    {
+      "block_date": "2026-11-07",
+      "tx_count": 682432,
+      "daily_active_accounts": 77076
+    },
+    {
+      "block_date": "2026-11-08",
+      "tx_count": 609504,
+      "daily_active_accounts": 79184
+    },
+    {
+      "block_date": "2026-11-09",
+      "tx_count": 895302,
+      "daily_active_accounts": 77752
+    },
+    {
+      "block_date": "2026-11-10",
+      "tx_count": 970505,
+      "daily_active_accounts": 177510
+    },
+    {
+      "block_date": "2026-11-11",
+      "tx_count": 891297,
+      "daily_active_accounts": 77831
+    },
+    {
+      "block_date": "2026-11-12",
+      "tx_count": 891523,
+      "daily_active_accounts": 85370
+    },
+    {
+      "block_date": "2026-11-13",
+      "tx_count": 1036324,
+      "daily_active_accounts": 85595
+    }
+  ]
+}
